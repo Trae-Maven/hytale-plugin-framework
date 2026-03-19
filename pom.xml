@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.trae</groupId>
+    <artifactId>hytale-plugin-framework</artifactId>
+    <version>0.0.1</version>
+
+    <name>Hytale-Plugin-Framework</name>
+
+    <description>A lightweight Hytale plugin framework providing structured base classes and utilities for building modular Hytale plugins. Works alongside the dependency injector and hierarchy framework for clean, strongly-typed plugin architectures.</description>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Trae-Maven/hytale-plugin-framework</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>hytale-release</id>
+            <url>https://maven.hytale.com/release</url>
+        </repository>
+
+        <repository>
+            <id>github-hierarchy-framework</id>
+            <url>https://maven.pkg.github.com/Trae-Maven/hierarchy-framework</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.36</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hypixel.hytale</groupId>
+            <artifactId>Server</artifactId>
+            <version>2026.02.19-1a311a592</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.trae</groupId>
+            <artifactId>hierarchy-framework</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+    </dependencies>
+
+</project>

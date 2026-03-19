@@ -1,0 +1,167 @@
+package io.github.trae.hytale.framework;
+
+import com.hypixel.hytale.component.system.EntityEventSystem;
+import com.hypixel.hytale.server.core.command.system.AbstractCommand;
+import com.hypixel.hytale.server.core.plugin.JavaPlugin;
+import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import io.github.trae.hf.Module;
+import io.github.trae.hf.Plugin;
+import io.github.trae.hf.SubModule;
+import io.github.trae.hytale.framework.event.Listener;
+import io.github.trae.hytale.framework.helper.CommandHelper;
+import io.github.trae.hytale.framework.helper.ListenerHelper;
+import io.github.trae.hytale.framework.helper.SystemHelper;
+import io.github.trae.utilities.UtilJava;
+import lombok.Getter;
+
+import javax.annotation.Nonnull;
+
+/**
+ * Base plugin class for the Hytale Plugin Framework.
+ *
+ * <p>Extends Hytale's {@link JavaPlugin} and implements the
+ * {@link io.github.trae.hf.Plugin Hierarchy-Framework Plugin} contract,
+ * bridging the Hytale plugin lifecycle with the component-based hierarchy
+ * architecture.</p>
+ *
+ * <p>Automatically handles registration and teardown of framework components
+ * through the {@link #onComponentInitialize(Object)} and
+ * {@link #onComponentShutdown(Object)} lifecycle callbacks:</p>
+ * <ul>
+ *   <li>{@link Listener} — registered with the event bus via {@link ListenerHelper}</li>
+ *   <li>{@link EntityEventSystem} — registered with the ECS registry via {@link SystemHelper}</li>
+ *   <li>{@link AbstractCommand} as {@link Module} — registered with the command system via {@link CommandHelper}</li>
+ *   <li>{@link AbstractCommand} as {@link SubModule} — attached to the parent command as a subcommand</li>
+ * </ul>
+ *
+ * <p>Commands use a two-phase registration: they are queued during component
+ * initialization and bulk-registered when {@link #initializePlugin()} calls
+ * {@link CommandHelper#process()}.</p>
+ *
+ * @see ListenerHelper
+ * @see SystemHelper
+ * @see CommandHelper
+ */
+@Getter
+public class HytalePlugin extends JavaPlugin implements Plugin {
+
+    /**
+     * Helper managing event listener registrations for this plugin.
+     */
+    private final CommandHelper commandHelper;
+
+    /**
+     * Helper managing ECS event system registrations for this plugin.
+     */
+    private final SystemHelper systemHelper;
+
+    /**
+     * Helper managing command registrations for this plugin.
+     */
+    private final ListenerHelper listenerHelper;
+
+    /**
+     * Creates a new {@link HytalePlugin} and initializes all framework helpers.
+     *
+     * @param javaPluginInit the Hytale-provided plugin initialization context
+     */
+    public HytalePlugin(@Nonnull final JavaPluginInit javaPluginInit) {
+        super(javaPluginInit);
+
+        this.listenerHelper = new ListenerHelper(this);
+        this.systemHelper = new SystemHelper(this);
+        this.commandHelper = new CommandHelper(this);
+    }
+
+    /**
+     * Initializes the plugin by running the hierarchy lifecycle and then
+     * bulk-processing all queued command registrations.
+     *
+     * <p>Calls {@link Plugin#initializePlugin()} first to trigger component
+     * discovery and initialization, then {@link CommandHelper#process()} to
+     * register all commands that were queued during
+     * {@link #onComponentInitialize(Object)}.</p>
+     */
+    @Override
+    public void initializePlugin() {
+        // Run hierarchy initialization — discovers and initializes all components
+        Plugin.super.initializePlugin();
+
+        // Bulk-register all queued commands with the command registry
+        this.commandHelper.process();
+    }
+
+    /**
+     * Lifecycle callback invoked when a hierarchy component is initialized.
+     *
+     * <p>Routes the component to the appropriate helper based on its type:</p>
+     * <ul>
+     *   <li>{@link Listener} — registered with the event bus</li>
+     *   <li>{@link EntityEventSystem} — registered with the ECS store registry</li>
+     *   <li>{@link AbstractCommand} + {@link Module} — queued as a root command</li>
+     *   <li>{@link AbstractCommand} + {@link SubModule} — attached to the parent
+     *       module's command as a subcommand</li>
+     * </ul>
+     *
+     * @param instance the component instance being initialized
+     */
+    @Override
+    public void onComponentInitialize(final Object instance) {
+        if (instance instanceof final Listener listener) {
+            this.listenerHelper.register(listener);
+        }
+
+        if (instance instanceof final EntityEventSystem<?, ?> entityEventSystem) {
+            this.systemHelper.register(entityEventSystem);
+        }
+
+        // Root commands — queued for bulk registration during initializePlugin()
+        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
+            this.commandHelper.register(abstractCommand);
+        }
+
+        // Subcommands — attached directly to their parent command
+        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
+            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
+
+            abstractCommand.addSubCommand(abstractSubCommand);
+        }
+    }
+
+    /**
+     * Lifecycle callback invoked when a hierarchy component is shut down.
+     *
+     * <p>Reverses the registrations performed in {@link #onComponentInitialize(Object)}:</p>
+     * <ul>
+     *   <li>{@link Listener} — unregistered from the event bus</li>
+     *   <li>{@link EntityEventSystem} — unregistered from the ECS store registry</li>
+     *   <li>{@link AbstractCommand} + {@link Module} — unregistered from the command system</li>
+     *   <li>{@link AbstractCommand} + {@link SubModule} — removed from the parent command's
+     *       subcommand map</li>
+     * </ul>
+     *
+     * @param instance the component instance being shut down
+     */
+    @Override
+    public void onComponentShutdown(final Object instance) {
+        if (instance instanceof final Listener listener) {
+            this.listenerHelper.unregister(listener);
+        }
+
+        if (instance instanceof final EntityEventSystem<?, ?> entityEventSystem) {
+            this.systemHelper.unregister(entityEventSystem);
+        }
+
+        // Root commands — unregistered from the command system
+        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
+            this.commandHelper.unregister(abstractCommand);
+        }
+
+        // Subcommands — removed from the parent command's subcommand map
+        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
+            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
+
+            abstractCommand.getSubCommands().remove(abstractSubCommand.getName());
+        }
+    }
+}
