@@ -2,9 +2,7 @@ package io.github.trae.hytale.framework.helper;
 
 import com.hypixel.hytale.component.SystemType;
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import com.hypixel.hytale.component.system.ISystem;
 import com.hypixel.hytale.function.consumer.BooleanConsumer;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.helper.abstracts.AbstractHelper;
 import io.github.trae.hytale.framework.system.CustomChunkEventSystem;
@@ -51,7 +49,7 @@ public class SystemHelper extends AbstractHelper<EntityEventSystem<?, ?>> {
      *
      * @param entityEventSystem the event system to register
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void register(final EntityEventSystem<?, ?> entityEventSystem) {
         // Only accept framework-managed event systems
@@ -66,10 +64,9 @@ public class SystemHelper extends AbstractHelper<EntityEventSystem<?, ?>> {
 
         // Register entity-store-based event systems
         if (entityEventSystem instanceof final CustomEntityEventSystem<?> customEntityEventSystem) {
-            final SystemType<EntityStore, ISystem<EntityStore>> systemType = (SystemType<EntityStore, ISystem<EntityStore>>) this.getPlugin().getEntityStoreRegistry().registerSystemType((Class<? super CustomEntityEventSystem<?>>) customEntityEventSystem.getClass());
+            final SystemType systemType = this.getPlugin().getEntityStoreRegistry().registerSystemType((Class) customEntityEventSystem.getClass());
 
             this.REGISTRATIONS.put(customEntityEventSystem, (shutdown) -> {
-                // Only unregister the system type during normal operation, not during shutdown
                 if (!(shutdown)) {
                     systemType.getRegistry().unregisterSystemType(systemType);
                 }
@@ -78,10 +75,9 @@ public class SystemHelper extends AbstractHelper<EntityEventSystem<?, ?>> {
 
         // Register chunk-store-based event systems
         if (entityEventSystem instanceof final CustomChunkEventSystem<?> customChunkEventSystem) {
-            final SystemType<EntityStore, ISystem<EntityStore>> systemType = (SystemType<EntityStore, ISystem<EntityStore>>) this.getPlugin().getEntityStoreRegistry().registerSystemType((Class<? super CustomChunkEventSystem<?>>) customChunkEventSystem.getClass());
+            final SystemType systemType = this.getPlugin().getEntityStoreRegistry().registerSystemType((Class) customChunkEventSystem.getClass());
 
             this.REGISTRATIONS.put(customChunkEventSystem, (shutdown) -> {
-                // Only unregister the system type during normal operation, not during shutdown
                 if (!(shutdown)) {
                     systemType.getRegistry().unregisterSystemType(systemType);
                 }
