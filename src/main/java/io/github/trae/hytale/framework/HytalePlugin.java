@@ -46,7 +46,7 @@ import javax.annotation.Nonnull;
 public class HytalePlugin extends JavaPlugin implements Plugin {
 
     /**
-     * Helper managing event listener registrations for this plugin.
+     * Helper managing command registrations for this plugin.
      */
     private final CommandHelper commandHelper;
 
@@ -56,7 +56,7 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     private final SystemHelper systemHelper;
 
     /**
-     * Helper managing command registrations for this plugin.
+     * Helper managing event listener registrations for this plugin.
      */
     private final ListenerHelper listenerHelper;
 
