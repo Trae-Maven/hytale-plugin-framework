@@ -5,6 +5,9 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import lombok.experimental.UtilityClass;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
@@ -138,5 +141,104 @@ public class UtilTask {
         });
 
         return completableFuture;
+    }
+
+    /**
+     * Schedules a {@link Runnable} to execute at a fixed rate on the server's
+     * {@link HytaleServer#SCHEDULED_EXECUTOR} with an optional cancellation supplier.
+     *
+     * <p>The task will first execute after {@code initialDelay}, then repeatedly
+     * every {@code period} measured from the <b>start</b> of the previous execution.
+     * If a {@code cancelSupplier} is provided, it is checked before each invocation —
+     * if it returns {@code true}, the scheduled task is cancelled and the runnable
+     * will not execute.</p>
+     *
+     * @param runnable       the task to execute
+     * @param initialDelay   the time to delay first execution
+     * @param period         the period between successive executions
+     * @param timeUnit       the time unit of the {@code initialDelay} and {@code period} parameters
+     * @param cancelSupplier a supplier that returns {@code true} to cancel the scheduled task (may be {@code null})
+     */
+    public static void schedule(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit, final Supplier<Boolean> cancelSupplier) {
+        final AtomicReference<ScheduledFuture<?>> futureRef = new AtomicReference<>();
+
+        final ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+            if (cancelSupplier != null) {
+                if (cancelSupplier.get()) {
+                    final ScheduledFuture<?> self = futureRef.get();
+                    if (self != null) {
+                        self.cancel(false);
+                    }
+                    return;
+                }
+            }
+            runnable.run();
+        }, initialDelay, period, timeUnit);
+
+        futureRef.set(future);
+    }
+
+    /**
+     * Schedules a {@link Runnable} to execute at a fixed rate on the server's
+     * {@link HytaleServer#SCHEDULED_EXECUTOR}.
+     *
+     * @param runnable     the task to execute
+     * @param initialDelay the time to delay first execution
+     * @param period       the period between successive executions
+     * @param timeUnit     the time unit of the {@code initialDelay} and {@code period} parameters
+     * @see #schedule(Runnable, int, int, TimeUnit, Supplier)
+     */
+    public static void schedule(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit) {
+        schedule(runnable, initialDelay, period, timeUnit, null);
+    }
+
+    /**
+     * Schedules a {@link Runnable} to execute at a fixed rate, with each invocation
+     * offloaded asynchronously via {@link #executeAsynchronous(Runnable)}, with an
+     * optional cancellation supplier.
+     *
+     * <p>The scheduled executor acts purely as a timer — the actual work runs on
+     * the common {@link java.util.concurrent.ForkJoinPool}, preventing long-running
+     * tasks from blocking the scheduler thread. If a {@code cancelSupplier} is provided,
+     * it is checked before each invocation — if it returns {@code true}, the scheduled
+     * task is cancelled and the runnable will not execute.</p>
+     *
+     * @param runnable       the task to execute asynchronously on each tick
+     * @param initialDelay   the time to delay first execution
+     * @param period         the period between successive executions
+     * @param timeUnit       the time unit of the {@code initialDelay} and {@code period} parameters
+     * @param cancelSupplier a supplier that returns {@code true} to cancel the scheduled task (may be {@code null})
+     */
+    public static void scheduleAsynchronous(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit, final Supplier<Boolean> cancelSupplier) {
+        final AtomicReference<ScheduledFuture<?>> futureRef = new AtomicReference<>();
+
+        final ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+            if (cancelSupplier != null) {
+                if (cancelSupplier.get()) {
+                    final ScheduledFuture<?> self = futureRef.get();
+                    if (self != null) {
+                        self.cancel(false);
+                    }
+                    return;
+                }
+            }
+            executeAsynchronous(runnable);
+        }, initialDelay, period, timeUnit);
+
+        futureRef.set(future);
+    }
+
+    /**
+     * Schedules a {@link Runnable} to execute at a fixed rate, with each invocation
+     * offloaded asynchronously via {@link #executeAsynchronous(Runnable)}.
+     *
+     * @param runnable     the task to execute asynchronously on each tick
+     * @param initialDelay the time to delay first execution
+     * @param period       the period between successive executions
+     * @param timeUnit     the time unit of the {@code initialDelay} and {@code period} parameters
+     * @see #scheduleAsynchronous(Runnable, int, int, TimeUnit, Supplier)
+     */
+    public static void scheduleAsynchronous(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit) {
+        scheduleAsynchronous(runnable, initialDelay, period, timeUnit, null);
     }
 }
