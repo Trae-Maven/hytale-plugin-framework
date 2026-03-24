@@ -93,12 +93,12 @@ public class CorePlugin extends HytalePlugin {
     }
 
     @Override
-    public void onEnable() {
+    public void setup() {
         this.initializePlugin();
     }
 
     @Override
-    public void onDisable() {
+    public void shutdown() {
         this.shutdownPlugin();
     }
 }
