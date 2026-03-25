@@ -4,6 +4,7 @@ import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import io.github.trae.di.InjectorApi;
 import io.github.trae.hf.Module;
 import io.github.trae.hf.Plugin;
 import io.github.trae.hf.SubModule;
@@ -84,6 +85,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      */
     @Override
     public void initializePlugin() {
+        InjectorApi.setConfigurationDirectory(this.getDataDirectory());
+
         // Run hierarchy initialization — discovers and initializes all components
         Plugin.super.initializePlugin();
 
