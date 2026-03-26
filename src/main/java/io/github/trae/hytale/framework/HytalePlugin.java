@@ -1,7 +1,6 @@
 package io.github.trae.hytale.framework;
 
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -63,10 +62,6 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      */
     private final ListenerHelper listenerHelper;
 
-    static {
-        UtilLogger.setLogger(HytaleLogger.getLogger());
-    }
-
     /**
      * Creates a new {@link HytalePlugin} and initializes all framework helpers.
      *
@@ -74,6 +69,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      */
     public HytalePlugin(@Nonnull final JavaPluginInit javaPluginInit) {
         super(javaPluginInit);
+
+        UtilLogger.setLogger(this.getLogger());
 
         this.listenerHelper = new ListenerHelper(this);
         this.systemHelper = new SystemHelper(this);
