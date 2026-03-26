@@ -1,6 +1,7 @@
 package io.github.trae.hytale.framework;
 
 import com.hypixel.hytale.component.system.EntityEventSystem;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -13,6 +14,7 @@ import io.github.trae.hytale.framework.helper.CommandHelper;
 import io.github.trae.hytale.framework.helper.ListenerHelper;
 import io.github.trae.hytale.framework.helper.SystemHelper;
 import io.github.trae.utilities.UtilJava;
+import io.github.trae.utilities.UtilLogger;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -60,6 +62,10 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      * Helper managing event listener registrations for this plugin.
      */
     private final ListenerHelper listenerHelper;
+
+    static {
+        UtilLogger.setLogger(HytaleLogger.getLogger());
+    }
 
     /**
      * Creates a new {@link HytalePlugin} and initializes all framework helpers.
