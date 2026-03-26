@@ -150,8 +150,9 @@ public class UtilTask {
      * <p>The task will first execute after {@code initialDelay}, then repeatedly
      * every {@code period} measured from the <b>start</b> of the previous execution.
      * If a {@code cancelSupplier} is provided, it is checked before each invocation —
-     * if it returns {@code true}, the scheduled task is cancelled and the runnable
-     * will not execute.</p>
+     * if it returns {@code true}, the scheduled future is cancelled and the runnable
+     * will not execute. Additionally, if the future is already done (cancelled or
+     * terminated), the runnable will not execute.</p>
      *
      * @param runnable       the task to execute
      * @param initialDelay   the time to delay first execution
@@ -159,19 +160,23 @@ public class UtilTask {
      * @param timeUnit       the time unit of the {@code initialDelay} and {@code period} parameters
      * @param cancelSupplier a supplier that returns {@code true} to cancel the scheduled task (may be {@code null})
      */
-    public static void schedule(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit, final Supplier<Boolean> cancelSupplier) {
+    public static void schedule(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit, final Supplier<Boolean> cancelSupplier, final boolean mayInterruptIfRunning) {
         final AtomicReference<ScheduledFuture<?>> futureRef = new AtomicReference<>();
 
         final ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
-            if (cancelSupplier != null) {
-                if (cancelSupplier.get()) {
-                    final ScheduledFuture<?> self = futureRef.get();
-                    if (self != null) {
-                        self.cancel(false);
-                    }
-                    return;
-                }
+            final ScheduledFuture<?> self = futureRef.get();
+
+            if (self != null && self.isDone()) {
+                return;
             }
+
+            if (cancelSupplier != null && cancelSupplier.get()) {
+                if (self != null) {
+                    self.cancel(mayInterruptIfRunning);
+                }
+                return;
+            }
+
             runnable.run();
         }, initialDelay, period, timeUnit);
 
@@ -186,10 +191,10 @@ public class UtilTask {
      * @param initialDelay the time to delay first execution
      * @param period       the period between successive executions
      * @param timeUnit     the time unit of the {@code initialDelay} and {@code period} parameters
-     * @see #schedule(Runnable, int, int, TimeUnit, Supplier)
+     * @see #schedule(Runnable, int, int, TimeUnit, Supplier, boolean)
      */
     public static void schedule(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit) {
-        schedule(runnable, initialDelay, period, timeUnit, null);
+        schedule(runnable, initialDelay, period, timeUnit, null, false);
     }
 
     /**
@@ -201,7 +206,8 @@ public class UtilTask {
      * the common {@link java.util.concurrent.ForkJoinPool}, preventing long-running
      * tasks from blocking the scheduler thread. If a {@code cancelSupplier} is provided,
      * it is checked before each invocation — if it returns {@code true}, the scheduled
-     * task is cancelled and the runnable will not execute.</p>
+     * future is cancelled and the runnable will not execute. Additionally, if the future
+     * is already done (cancelled or terminated), the runnable will not execute.</p>
      *
      * @param runnable       the task to execute asynchronously on each tick
      * @param initialDelay   the time to delay first execution
@@ -209,19 +215,23 @@ public class UtilTask {
      * @param timeUnit       the time unit of the {@code initialDelay} and {@code period} parameters
      * @param cancelSupplier a supplier that returns {@code true} to cancel the scheduled task (may be {@code null})
      */
-    public static void scheduleAsynchronous(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit, final Supplier<Boolean> cancelSupplier) {
+    public static void scheduleAsynchronous(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit, final Supplier<Boolean> cancelSupplier, final boolean mayInterruptIfRunning) {
         final AtomicReference<ScheduledFuture<?>> futureRef = new AtomicReference<>();
 
         final ScheduledFuture<?> future = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
-            if (cancelSupplier != null) {
-                if (cancelSupplier.get()) {
-                    final ScheduledFuture<?> self = futureRef.get();
-                    if (self != null) {
-                        self.cancel(false);
-                    }
-                    return;
-                }
+            final ScheduledFuture<?> self = futureRef.get();
+
+            if (self != null && self.isDone()) {
+                return;
             }
+
+            if (cancelSupplier != null && cancelSupplier.get()) {
+                if (self != null) {
+                    self.cancel(mayInterruptIfRunning);
+                }
+                return;
+            }
+
             executeAsynchronous(runnable);
         }, initialDelay, period, timeUnit);
 
@@ -236,9 +246,9 @@ public class UtilTask {
      * @param initialDelay the time to delay first execution
      * @param period       the period between successive executions
      * @param timeUnit     the time unit of the {@code initialDelay} and {@code period} parameters
-     * @see #scheduleAsynchronous(Runnable, int, int, TimeUnit, Supplier)
+     * @see #scheduleAsynchronous(Runnable, int, int, TimeUnit, Supplier, boolean)
      */
     public static void scheduleAsynchronous(final Runnable runnable, final int initialDelay, final int period, final TimeUnit timeUnit) {
-        scheduleAsynchronous(runnable, initialDelay, period, timeUnit, null);
+        scheduleAsynchronous(runnable, initialDelay, period, timeUnit, null, false);
     }
 }
