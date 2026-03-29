@@ -12,6 +12,9 @@ import io.github.trae.hytale.framework.event.Listener;
 import io.github.trae.hytale.framework.helper.CommandHelper;
 import io.github.trae.hytale.framework.helper.ListenerHelper;
 import io.github.trae.hytale.framework.helper.SystemHelper;
+import io.github.trae.hytale.framework.plugin.events.PluginInitializeEvent;
+import io.github.trae.hytale.framework.plugin.events.PluginShutdownEvent;
+import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.utilities.UtilJava;
 import io.github.trae.utilities.UtilLogger;
 import lombok.Getter;
@@ -98,6 +101,15 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
         // Bulk-register all queued commands with the command registry
         this.commandHelper.process();
+
+        UtilEvent.dispatch(new PluginInitializeEvent(this));
+    }
+
+    @Override
+    public void shutdownPlugin() {
+        UtilEvent.dispatch(new PluginShutdownEvent(this));
+
+        Plugin.super.shutdownPlugin();
     }
 
     /**
