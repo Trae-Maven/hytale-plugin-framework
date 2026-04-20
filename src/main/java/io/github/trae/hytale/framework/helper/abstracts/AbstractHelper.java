@@ -10,13 +10,15 @@ import lombok.Getter;
  * Abstract base class for framework helpers that manage registerable components.
  *
  * <p>Each helper is bound to a specific {@link HytalePlugin} instance, which provides
- * access to the plugin's registries (event, command, system, etc.). Concrete
+ * access to the plugin's registries (event, command, system, packet, etc.). Concrete
  * implementations define the registration and unregistration logic for their
  * component type via {@link IAbstractHelper}.</p>
  *
  * @param <Type> the type of component this helper manages
- * @see io.github.trae.hytale.framework.helper.ListenerHelper
  * @see io.github.trae.hytale.framework.helper.CommandHelper
+ * @see io.github.trae.hytale.framework.helper.ListenerHelper
+ * @see io.github.trae.hytale.framework.helper.PacketWatcherHelper
+ * @see io.github.trae.hytale.framework.helper.PlayerPacketWatcherHelper
  * @see io.github.trae.hytale.framework.helper.SystemHelper
  */
 @AllArgsConstructor

@@ -1,14 +1,15 @@
 # Hytale-Plugin-Framework
 
-A Hytale server plugin framework providing structured command systems, event utilities, ECS integration, and lifecycle management built on the [Hierarchy-Framework](https://github.com/Trae-Maven/hierarchy-framework).
+A Hytale server plugin framework providing structured command systems, event utilities, packet interception, ECS integration, and lifecycle management built on the [Hierarchy-Framework](https://github.com/Trae-Maven/hierarchy-framework).
 
-Hytale-Plugin-Framework bridges the Hytale plugin lifecycle with the component-based hierarchy architecture, automatically handling registration and teardown of listeners, commands, subcommands, and ECS event systems as components are initialized and shut down.
+Hytale-Plugin-Framework bridges the Hytale plugin lifecycle with the component-based hierarchy architecture, automatically handling registration and teardown of listeners, packet watchers, commands, subcommands, and ECS event systems as components are initialized and shut down.
 
 ---
 
 ## Features
 
-- Automatic Hytale registration — listeners, commands, subcommands, and ECS systems are registered/unregistered through hierarchy lifecycle callbacks
+- Automatic Hytale registration — listeners, packet watchers, commands, subcommands, and ECS systems are registered/unregistered through hierarchy lifecycle callbacks
+- Packet interception — inbound and outbound packet watchers with automatic pipeline registration and deregistration
 - ECS event system integration — custom entity and chunk event systems with a unified `SystemContext` API
 - Thread-safe event dispatch utilities — synchronous and asynchronous with `CompletableFuture` support
 - Custom event base classes with cancellation reasons
@@ -83,7 +84,7 @@ Add the dependency to your Maven project:
 
 ### Defining the Plugin
 
-Extend `HytalePlugin` to get automatic listener, command, subcommand, and ECS system registration:
+Extend `HytalePlugin` to get automatic listener, packet watcher, command, subcommand, and ECS system registration:
 ```java
 @Application
 public class CorePlugin extends HytalePlugin {
@@ -197,6 +198,17 @@ UtilTask.executeAsynchronous(() -> {
 
 ---
 
+## Packet Watchers
+
+| Marker Interface | Direction | Description |
+|---|---|---|
+| `InboundPacketWatcher` | Client → Server | Observes packets sent by the client |
+| `OutboundPacketWatcher` | Server → Client | Observes packets sent to the client |
+
+Packet watchers implement `PacketWatcher` or `PlayerPacketWatcher` alongside a direction marker. They are automatically registered with `PacketAdapters` on component initialization and deregistered on shutdown. All packet watchers run on the network thread — ECS component access must be scheduled via `world.execute()`.
+
+---
+
 ## ECS Systems
 
 | System Type | Store | Use Case |
@@ -214,5 +226,7 @@ Both system types wrap the raw `EntityEventSystem.handle(...)` parameters into a
 |---|---|
 | `HytalePlugin` | Root plugin with automatic Hytale registration callbacks |
 | `Listener` | Marker interface for event listener discovery |
+| `InboundPacketWatcher` | Marker interface for inbound packet watcher direction |
+| `OutboundPacketWatcher` | Marker interface for outbound packet watcher direction |
 | `Processable` | Deferred batch-processing contract for helpers |
 | `ICustomEventSystem` | Unified handler contract for custom ECS event systems |
