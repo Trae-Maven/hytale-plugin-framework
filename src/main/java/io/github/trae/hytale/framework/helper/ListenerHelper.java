@@ -116,7 +116,7 @@ public class ListenerHelper extends AbstractHelper<Listener> {
      *
      * <p>Determines whether to use synchronous or asynchronous registration based
      * on whether the event class is assignable to {@link IAsyncEvent}. The priority
-     * is read from the {@link EventHandler} annotation on the event class.</p>
+     * is read from the {@link EventHandler} annotation on the method.</p>
      *
      * <p>Handler invocation is delegated to {@link UtilMethod#invoke(Method, Object, Object...)}
      * with exceptions wrapped in a {@link RuntimeException}.</p>
@@ -129,7 +129,7 @@ public class ListenerHelper extends AbstractHelper<Listener> {
     private EventRegistration<?, ?> getEventRegistration(final Listener listener, final Method method, final Class<IBaseEvent<?>> eventClass) {
         final EventRegistry eventRegistry = this.getPlugin().getEventRegistry();
 
-        final EventHandler annotation = eventClass.getAnnotation(EventHandler.class);
+        final EventHandler annotation = method.getAnnotation(EventHandler.class);
 
         // Async events are registered with thenApply chaining on the CompletableFuture
         if (eventClass.isAssignableFrom(IAsyncEvent.class)) {
