@@ -15,6 +15,7 @@ import io.github.trae.hytale.framework.helper.*;
 import io.github.trae.hytale.framework.plugin.events.PluginInitializeEvent;
 import io.github.trae.hytale.framework.plugin.events.PluginShutdownEvent;
 import io.github.trae.hytale.framework.utility.UtilEvent;
+import io.github.trae.hytale.framework.utility.UtilTask;
 import io.github.trae.utilities.UtilJava;
 import io.github.trae.utilities.UtilLogger;
 import lombok.Getter;
@@ -111,6 +112,9 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     @Override
     public void initializePlugin() {
         InjectorApi.setConfigurationDirectory(this.getDataDirectory());
+
+        InjectorApi.setSynchronousExecutor(UtilTask::executeSynchronous);
+        InjectorApi.setAsynchronousExecutor(UtilTask::executeAsynchronous);
 
         // Run hierarchy initialization — discovers and initializes all components
         Plugin.super.initializePlugin();
