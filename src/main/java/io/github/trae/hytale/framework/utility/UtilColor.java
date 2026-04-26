@@ -1,0 +1,38 @@
+package io.github.trae.hytale.framework.utility;
+
+import io.github.trae.hytale.framework.utility.enums.ChatColor;
+
+import java.awt.*;
+
+/**
+ * Utility class for color-related operations in chat formatting.
+ */
+public class UtilColor {
+
+    /**
+     * Wraps a string in Hytale rich text color tags.
+     *
+     * <p>If the color matches a known {@link ChatColor} name, the named tag is used
+     * (e.g. {@code <red>text</red>}). Otherwise, falls back to a hex color tag
+     * (e.g. {@code <#ff00aa>text</#ff00aa>}).</p>
+     *
+     * @param color  the color to apply
+     * @param string the text to wrap
+     * @return the text wrapped in opening and closing color tags
+     */
+    public static String serialize(final Color color, final String string) {
+        final String colorTag;
+
+        // Attempt to resolve a named ChatColor from the RGB value
+        final String chatColorName = ChatColor.getNameByRgb(color.getRGB());
+        if (chatColorName != null) {
+            // Use the lowercase named color (e.g. "red", "gold")
+            colorTag = chatColorName.toLowerCase();
+        } else {
+            // Fall back to hex representation, masking out the alpha channel
+            colorTag = "#%06x".formatted(color.getRGB() & 0xFFFFFF);
+        }
+
+        return "<%s>%s</%s>".formatted(colorTag, string, colorTag);
+    }
+}
