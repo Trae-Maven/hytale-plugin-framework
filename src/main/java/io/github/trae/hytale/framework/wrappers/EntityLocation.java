@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 /**
  * Represents a double-precision entity position within a world, including yaw and pitch rotation.
@@ -108,5 +109,23 @@ public class EntityLocation implements IEntityLocation {
         }
 
         return new EntityLocation(world, x, y, z, yaw, pitch);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof final EntityLocation entityLocation) {
+            if (!(entityLocation.getWorld().getName().equals(this.getWorld().getName()))) {
+                return false;
+            }
+
+            return entityLocation.getX() == this.getX() && entityLocation.getY() == this.getY() && entityLocation.getZ() == this.getZ();
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
     }
 }

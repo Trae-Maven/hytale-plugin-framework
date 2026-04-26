@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 /**
  * Represents an integer-precision block position within a world.
@@ -79,5 +80,23 @@ public class BlockLocation implements IBlockLocation {
         }
 
         return new BlockLocation(world, x, y, z);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof final BlockLocation blockLocation) {
+            if (!(blockLocation.getWorld().getName().equals(this.getWorld().getName()))) {
+                return false;
+            }
+
+            return blockLocation.getX() == this.getX() && blockLocation.getY() == this.getY() && blockLocation.getZ() == this.getZ();
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
     }
 }

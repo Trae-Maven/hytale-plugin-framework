@@ -18,6 +18,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a chunk column (32x320x32) within a world.
@@ -197,5 +198,23 @@ public class Chunk implements IChunk {
         }
 
         return new Chunk(world, x, z);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof final Chunk chunk) {
+            if (!(chunk.getWorld().getName().equals(this.getWorld().getName()))) {
+                return false;
+            }
+
+            return chunk.getX() == this.getX() && chunk.getZ() == this.getZ();
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getWorld().getName(), this.getX(), this.getZ());
     }
 }
