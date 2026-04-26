@@ -1,12 +1,14 @@
 package io.github.trae.hytale.framework.utility;
 
 import io.github.trae.hytale.framework.utility.enums.ChatColor;
+import lombok.experimental.UtilityClass;
 
 import java.awt.*;
 
 /**
  * Utility class for color-related operations in chat formatting.
  */
+@UtilityClass
 public class UtilColor {
 
     /**
