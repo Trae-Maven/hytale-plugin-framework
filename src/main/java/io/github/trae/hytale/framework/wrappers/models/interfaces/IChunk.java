@@ -1,7 +1,7 @@
-package io.github.trae.hytale.framework.wrappers.interfaces;
+package io.github.trae.hytale.framework.wrappers.models.interfaces;
 
 import com.hypixel.hytale.server.core.entity.Entity;
-import io.github.trae.hytale.framework.wrappers.BlockLocation;
+import io.github.trae.hytale.framework.wrappers.models.BlockLocation;
 
 import java.util.List;
 

@@ -1,16 +1,17 @@
-package io.github.trae.hytale.framework.wrappers;
+package io.github.trae.hytale.framework.wrappers.models;
 
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.server.core.entity.Entity;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.EntityChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import io.github.trae.hytale.framework.wrappers.interfaces.IChunk;
+import io.github.trae.hytale.framework.wrappers.models.interfaces.IChunk;
 import io.github.trae.utilities.UtilJava;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -62,6 +63,10 @@ public class Chunk implements IChunk {
 
     private final World world;
     private final int x, z;
+
+    public static Chunk of(final World world, final Vector3d vector3d) {
+        return new Chunk(world, (int) Math.floor(vector3d.getX()) >> 5, (int) Math.floor(vector3d.getZ()) >> 5);
+    }
 
     /**
      * Returns a BlockLocation at the given block coordinates within this chunk's world.

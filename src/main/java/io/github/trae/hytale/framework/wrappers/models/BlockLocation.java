@@ -1,10 +1,10 @@
-package io.github.trae.hytale.framework.wrappers;
+package io.github.trae.hytale.framework.wrappers.models;
 
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import io.github.trae.hytale.framework.wrappers.interfaces.IBlockLocation;
+import io.github.trae.hytale.framework.wrappers.models.interfaces.IBlockLocation;
 import io.github.trae.utilities.UtilJava;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

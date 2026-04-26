@@ -1,11 +1,11 @@
-package io.github.trae.hytale.framework.wrappers;
+package io.github.trae.hytale.framework.wrappers.models;
 
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import io.github.trae.hytale.framework.wrappers.interfaces.IEntityLocation;
+import io.github.trae.hytale.framework.wrappers.models.interfaces.IEntityLocation;
 import io.github.trae.utilities.UtilJava;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,13 +48,6 @@ public class EntityLocation implements IEntityLocation {
      */
     public static EntityLocation of(final World world, final Vector3d vector3d, final Vector3f vector3f) {
         return new EntityLocation(world, vector3d.getX(), vector3d.getY(), vector3d.getZ(), vector3f.getY(), vector3f.getX());
-    }
-
-    /**
-     * Creates an EntityLocation directly from a {@link TransformComponent}.
-     */
-    public static EntityLocation of(final World world, final TransformComponent transformComponent) {
-        return of(world, transformComponent.getPosition(), transformComponent.getRotation());
     }
 
     /**
