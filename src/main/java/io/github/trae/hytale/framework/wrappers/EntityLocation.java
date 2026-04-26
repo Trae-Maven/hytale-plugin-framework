@@ -80,12 +80,12 @@ public class EntityLocation implements IEntityLocation {
      */
     public static LinkedHashMap<String, Object> serialize(final EntityLocation entityLocation) {
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
-            map.put("World", entityLocation.getWorld().getName());
+            map.put("WORLD", entityLocation.getWorld().getName());
             map.put("X", entityLocation.getX());
             map.put("Y", entityLocation.getY());
             map.put("Z", entityLocation.getZ());
-            map.put("Yaw", entityLocation.getYaw());
-            map.put("Pitch", entityLocation.getPitch());
+            map.put("YAW", entityLocation.getYaw());
+            map.put("PITCH", entityLocation.getPitch());
         });
     }
 

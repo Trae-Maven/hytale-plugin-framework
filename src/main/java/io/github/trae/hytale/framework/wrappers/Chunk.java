@@ -175,7 +175,7 @@ public class Chunk implements IChunk {
      */
     public static LinkedHashMap<String, Object> serialize(final Chunk chunk) {
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
-            map.put("World", chunk.getWorld().getName());
+            map.put("WORLD", chunk.getWorld().getName());
             map.put("X", chunk.getX());
             map.put("Z", chunk.getZ());
         });

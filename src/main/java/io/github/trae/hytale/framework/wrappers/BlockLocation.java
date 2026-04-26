@@ -55,7 +55,7 @@ public class BlockLocation implements IBlockLocation {
      */
     public static LinkedHashMap<String, Object> serialize(final BlockLocation blockLocation) {
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
-            map.put("World", blockLocation.getWorld().getName());
+            map.put("WORLD", blockLocation.getWorld().getName());
             map.put("X", blockLocation.getX());
             map.put("Y", blockLocation.getY());
             map.put("Z", blockLocation.getZ());
