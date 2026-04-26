@@ -44,8 +44,8 @@ public abstract class AsyncPlayerCommand<BasePlugin extends HytalePlugin, BaseMa
     /**
      * Called asynchronously when a player executes the command.
      *
-     * @param player the player who ran the command
-     * @param args   the arguments following the command name
+     * @param playerRef the player who ran the command
+     * @param args      the arguments following the command name
      */
-    public abstract void execute(final PlayerRef player, final String[] args);
+    public abstract void execute(final PlayerRef playerRef, final String[] args);
 }

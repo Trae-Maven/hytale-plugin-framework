@@ -42,8 +42,8 @@ public abstract class PlayerSubCommand<BasePlugin extends HytalePlugin, BaseModu
     /**
      * Called when a player executes the subcommand.
      *
-     * @param player the player who ran the command
-     * @param args   the arguments following the subcommand name
+     * @param playerRef the player who ran the command
+     * @param args      the arguments following the subcommand name
      */
-    public abstract void execute(final PlayerRef player, final String[] args);
+    public abstract void execute(final PlayerRef playerRef, final String[] args);
 }
