@@ -95,12 +95,12 @@ public class EntityLocation implements IEntityLocation {
      * @return the deserialized EntityLocation, or null if the world is not loaded
      */
     public static EntityLocation deserialize(final LinkedHashMap<String, Object> serializedMap) {
-        final String worldName = UtilJava.cast(String.class, serializedMap.get("World"));
+        final String worldName = UtilJava.cast(String.class, serializedMap.get("WORLD"));
         final Double x = UtilJava.cast(Double.class, serializedMap.get("X"));
         final Double y = UtilJava.cast(Double.class, serializedMap.get("Y"));
         final Double z = UtilJava.cast(Double.class, serializedMap.get("Z"));
-        final Float yaw = UtilJava.cast(Float.class, serializedMap.get("Yaw"));
-        final Float pitch = UtilJava.cast(Float.class, serializedMap.get("Pitch"));
+        final Float yaw = UtilJava.cast(Float.class, serializedMap.get("YAW"));
+        final Float pitch = UtilJava.cast(Float.class, serializedMap.get("PITCH"));
 
         final World world = Universe.get().getWorld(worldName);
         if (world == null) {

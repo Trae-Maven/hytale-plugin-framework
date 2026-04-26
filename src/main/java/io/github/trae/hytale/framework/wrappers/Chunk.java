@@ -187,7 +187,7 @@ public class Chunk implements IChunk {
      * @return the deserialized Chunk, or null if the world is not loaded
      */
     public static Chunk deserialize(final LinkedHashMap<String, Object> serializedMap) {
-        final String worldName = UtilJava.cast(String.class, serializedMap.get("World"));
+        final String worldName = UtilJava.cast(String.class, serializedMap.get("WORLD"));
         final Integer x = UtilJava.cast(Integer.class, serializedMap.get("X"));
         final Integer z = UtilJava.cast(Integer.class, serializedMap.get("Z"));
 
