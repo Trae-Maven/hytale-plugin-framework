@@ -1,11 +1,9 @@
 package io.github.trae.hytale.framework.wrappers.interfaces;
 
 import io.github.trae.hytale.framework.wrappers.BlockLocation;
-import io.github.trae.hytale.framework.wrappers.Chunk;
+import io.github.trae.hytale.framework.wrappers.Location;
 
-public interface IEntityLocation {
-
-    Chunk getChunk();
+public interface IEntityLocation extends Location {
 
     BlockLocation toBlockLocation();
 }
