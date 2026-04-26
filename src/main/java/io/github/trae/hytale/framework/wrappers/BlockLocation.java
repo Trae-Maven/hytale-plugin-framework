@@ -83,6 +83,11 @@ public class BlockLocation implements IBlockLocation {
     }
 
     @Override
+    public String toString() {
+        return "%s{world=%s, x=%s, y=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
+    }
+
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof final BlockLocation blockLocation) {
             if (!(blockLocation.getWorld().getName().equals(this.getWorld().getName()))) {

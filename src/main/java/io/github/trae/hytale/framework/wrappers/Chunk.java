@@ -201,6 +201,11 @@ public class Chunk implements IChunk {
     }
 
     @Override
+    public String toString() {
+        return "%s{world=%s, x=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorld().getName(), this.getX(), this.getZ());
+    }
+
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof final Chunk chunk) {
             if (!(chunk.getWorld().getName().equals(this.getWorld().getName()))) {

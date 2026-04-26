@@ -112,6 +112,11 @@ public class EntityLocation implements IEntityLocation {
     }
 
     @Override
+    public String toString() {
+        return "%s{world=%s, x=%s, y=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
+    }
+
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof final EntityLocation entityLocation) {
             if (!(entityLocation.getWorld().getName().equals(this.getWorld().getName()))) {
