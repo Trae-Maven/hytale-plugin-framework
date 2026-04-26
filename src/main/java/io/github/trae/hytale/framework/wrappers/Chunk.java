@@ -1,4 +1,4 @@
-package io.github.trae.hytale.framework.wrappers.models;
+package io.github.trae.hytale.framework.wrappers;
 
 import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ComponentType;
@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.EntityChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import io.github.trae.hytale.framework.wrappers.models.interfaces.IChunk;
+import io.github.trae.hytale.framework.wrappers.interfaces.IChunk;
 import io.github.trae.utilities.UtilJava;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

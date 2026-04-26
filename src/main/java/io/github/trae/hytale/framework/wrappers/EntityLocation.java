@@ -1,11 +1,11 @@
-package io.github.trae.hytale.framework.wrappers.models;
+package io.github.trae.hytale.framework.wrappers;
 
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import io.github.trae.hytale.framework.wrappers.models.interfaces.IEntityLocation;
+import io.github.trae.hytale.framework.wrappers.interfaces.IEntityLocation;
 import io.github.trae.utilities.UtilJava;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
