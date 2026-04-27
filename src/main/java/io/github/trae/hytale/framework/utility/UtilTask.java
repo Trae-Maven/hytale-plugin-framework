@@ -144,6 +144,42 @@ public class UtilTask {
     }
 
     /**
+     * Schedules a {@link Runnable} to execute once on the server's
+     * {@link HytaleServer#SCHEDULED_EXECUTOR} after the specified delay.
+     *
+     * @param runnable the task to execute
+     * @param delay    the time to delay execution
+     * @param timeUnit the time unit of the {@code delay} parameter
+     * @throws IllegalArgumentException if {@code runnable} is {@code null}
+     */
+    public static void executeLaterSynchronous(final Runnable runnable, final int delay, final TimeUnit timeUnit) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("Runnable cannot be null.");
+        }
+
+        HytaleServer.SCHEDULED_EXECUTOR.schedule(runnable, delay, timeUnit);
+    }
+
+    /**
+     * Schedules a {@link Runnable} to execute once asynchronously after
+     * the specified delay. The delay is managed by the server's
+     * {@link HytaleServer#SCHEDULED_EXECUTOR}, then the task is offloaded
+     * to the common {@link java.util.concurrent.ForkJoinPool}.
+     *
+     * @param runnable the task to execute asynchronously
+     * @param delay    the time to delay execution
+     * @param timeUnit the time unit of the {@code delay} parameter
+     * @throws IllegalArgumentException if {@code runnable} is {@code null}
+     */
+    public static void executeLaterAsynchronous(final Runnable runnable, final int delay, final TimeUnit timeUnit) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("Runnable cannot be null.");
+        }
+
+        HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> executeAsynchronous(runnable), delay, timeUnit);
+    }
+
+    /**
      * Schedules a {@link Runnable} to execute at a fixed rate on the server's
      * {@link HytaleServer#SCHEDULED_EXECUTOR} with an optional cancellation supplier.
      *
