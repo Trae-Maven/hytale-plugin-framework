@@ -98,20 +98,20 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     }
 
     /**
-     * Initializes the plugin by setting the configuration directory to the
-     * plugin's data folder and then running the hierarchy lifecycle.
+     * Initializes the plugin by registering the configuration directory
+     * for this application and then running the hierarchy lifecycle.
      *
-     * <p>Sets the configuration directory via
-     * {@link InjectorApi#setConfigurationDirectory(java.nio.file.Path)} so that
-     * {@link io.github.trae.di.configuration.annotations.Configuration @Configuration}
-     * files are stored under the plugin's data folder, then delegates to
+     * <p>Registers the configuration directory via
+     * {@link InjectorApi#setConfigurationDirectory(Class, java.nio.file.Path)}
+     * so that {@link io.github.trae.di.configuration.annotations.Configuration @Configuration}
+     * files are stored under this plugin's data folder, then delegates to
      * {@link Plugin#initializePlugin()} to trigger component discovery and
      * initialization. Queued commands are bulk-registered via
      * {@link CommandHelper#process()} after the hierarchy is fully wired.</p>
      */
     @Override
     public void initializePlugin() {
-        InjectorApi.setConfigurationDirectory(this.getDataDirectory());
+        InjectorApi.setConfigurationDirectory(this.getClass(), this.getDataDirectory());
 
         InjectorApi.setSynchronousExecutor(UtilTask::executeSynchronous);
         InjectorApi.setAsynchronousExecutor(UtilTask::executeAsynchronous);
