@@ -13,6 +13,8 @@ public interface IChunk {
 
     List<BlockLocation> getOutlineBlockLocations(final int blockY);
 
+    List<BlockLocation> getOutlineHighestBlockLocations();
+
     <EntityType extends Entity> List<EntityType> getEntitiesByType(final Class<EntityType> clazz);
 
     List<Entity> getEntities();

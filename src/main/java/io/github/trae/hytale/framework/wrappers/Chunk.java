@@ -122,6 +122,43 @@ public class Chunk implements IChunk {
     }
 
     /**
+     * Returns the perimeter block locations of this chunk, each at the highest block Y
+     * for that position. Uses the chunk's heightmap to determine the top solid block
+     * at each outline coordinate, producing a terrain-following border.
+     *
+     * @return the outline block locations at their respective highest Y, or an empty list if the chunk is not loaded
+     */
+    @Override
+    public List<BlockLocation> getOutlineHighestBlockLocations() {
+        final WorldChunk worldChunk = this.getWorld().getChunkIfLoaded(ChunkUtil.indexChunkFromBlock(this.getX() << SHIFT, this.getZ() << SHIFT));
+        if (worldChunk == null) {
+            return List.of();
+        }
+
+        return UtilJava.createCollection(new ArrayList<>(), list -> {
+            final int minBlockX = this.getX() << SHIFT;
+            final int minBlockZ = this.getZ() << SHIFT;
+
+            final int maxBlockX = minBlockX + WIDTH - 1;
+            final int maxBlockZ = minBlockZ + DEPTH - 1;
+
+            for (int blockX = minBlockX; blockX <= maxBlockX; blockX++) {
+                final int localX = blockX & MASK;
+
+                list.add(new BlockLocation(this.getWorld(), blockX, worldChunk.getHeight(localX, 0), minBlockZ));
+                list.add(new BlockLocation(this.getWorld(), blockX, worldChunk.getHeight(localX, MASK), maxBlockZ));
+            }
+
+            for (int blockZ = minBlockZ + 1; blockZ < maxBlockZ; blockZ++) {
+                final int localZ = blockZ & MASK;
+
+                list.add(new BlockLocation(this.getWorld(), minBlockX, worldChunk.getHeight(0, localZ), blockZ));
+                list.add(new BlockLocation(this.getWorld(), maxBlockX, worldChunk.getHeight(MASK, localZ), blockZ));
+            }
+        });
+    }
+
+    /**
      * Returns all entities in this chunk that are instances of the given type.
      * Scans the chunk's entity holders and resolves entity components via archetype introspection,
      * avoiding the deprecated {@code EntityUtils} methods.
