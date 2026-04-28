@@ -99,6 +99,10 @@ public class EntityLocation implements IEntityLocation {
      * Serializes this EntityLocation to a map for persistence.
      */
     public static LinkedHashMap<String, Object> serialize(final EntityLocation entityLocation) {
+        if (entityLocation == null) {
+            return null;
+        }
+
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
             map.put("WORLD", entityLocation.getWorldName());
             map.put("X", entityLocation.getX());
@@ -115,6 +119,10 @@ public class EntityLocation implements IEntityLocation {
      * @return the deserialized EntityLocation, or null if the world is not loaded
      */
     public static EntityLocation deserialize(final LinkedHashMap<String, Object> serializedMap) {
+        if (serializedMap == null) {
+            return null;
+        }
+
         final String worldName = UtilJava.cast(String.class, serializedMap.get("WORLD"));
         final Double x = UtilJava.cast(Double.class, serializedMap.get("X"));
         final Double y = UtilJava.cast(Double.class, serializedMap.get("Y"));

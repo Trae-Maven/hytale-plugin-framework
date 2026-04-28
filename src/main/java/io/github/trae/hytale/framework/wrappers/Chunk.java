@@ -232,6 +232,10 @@ public class Chunk implements IChunk {
      * Serializes this Chunk to a map for persistence.
      */
     public static LinkedHashMap<String, Object> serialize(final Chunk chunk) {
+        if (chunk == null) {
+            return null;
+        }
+
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
             map.put("WORLD", chunk.getWorldName());
             map.put("X", chunk.getX());
@@ -245,6 +249,10 @@ public class Chunk implements IChunk {
      * @return the deserialized Chunk, or null if the world is not loaded
      */
     public static Chunk deserialize(final LinkedHashMap<String, Object> serializedMap) {
+        if (serializedMap == null) {
+            return null;
+        }
+
         final String worldName = UtilJava.cast(String.class, serializedMap.get("WORLD"));
         final Integer x = UtilJava.cast(Integer.class, serializedMap.get("X"));
         final Integer z = UtilJava.cast(Integer.class, serializedMap.get("Z"));

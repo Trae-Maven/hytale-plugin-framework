@@ -75,6 +75,10 @@ public class BlockLocation implements IBlockLocation {
      * Serializes this BlockLocation to a map for persistence.
      */
     public static LinkedHashMap<String, Object> serialize(final BlockLocation blockLocation) {
+        if (blockLocation == null) {
+            return null;
+        }
+
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
             map.put("WORLD", blockLocation.getWorldName());
             map.put("X", blockLocation.getX());
@@ -89,6 +93,10 @@ public class BlockLocation implements IBlockLocation {
      * @return the deserialized BlockLocation, or null if the world is not loaded
      */
     public static BlockLocation deserialize(final LinkedHashMap<String, Object> serializedMap) {
+        if (serializedMap == null) {
+            return null;
+        }
+
         final String worldName = UtilJava.cast(String.class, serializedMap.get("WORLD"));
         final Integer x = UtilJava.cast(Integer.class, serializedMap.get("X"));
         final Integer y = UtilJava.cast(Integer.class, serializedMap.get("Y"));
