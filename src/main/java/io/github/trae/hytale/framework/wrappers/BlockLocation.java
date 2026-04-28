@@ -93,7 +93,7 @@ public class BlockLocation implements IBlockLocation {
      * @return the deserialized BlockLocation, or null if the world is not loaded
      */
     public static BlockLocation deserialize(final LinkedHashMap<String, Object> serializedMap) {
-        if (serializedMap == null) {
+        if (serializedMap == null || serializedMap.isEmpty()) {
             return null;
         }
 

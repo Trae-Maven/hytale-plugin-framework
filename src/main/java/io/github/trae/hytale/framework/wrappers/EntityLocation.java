@@ -119,7 +119,7 @@ public class EntityLocation implements IEntityLocation {
      * @return the deserialized EntityLocation, or null if the world is not loaded
      */
     public static EntityLocation deserialize(final LinkedHashMap<String, Object> serializedMap) {
-        if (serializedMap == null) {
+        if (serializedMap == null || serializedMap.isEmpty()) {
             return null;
         }
 

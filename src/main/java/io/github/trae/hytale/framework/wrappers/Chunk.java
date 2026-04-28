@@ -249,7 +249,7 @@ public class Chunk implements IChunk {
      * @return the deserialized Chunk, or null if the world is not loaded
      */
     public static Chunk deserialize(final LinkedHashMap<String, Object> serializedMap) {
-        if (serializedMap == null) {
+        if (serializedMap == null || serializedMap.isEmpty()) {
             return null;
         }
 
