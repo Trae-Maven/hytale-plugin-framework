@@ -7,8 +7,8 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import io.github.trae.hytale.framework.wrappers.interfaces.IEntityLocation;
 import io.github.trae.utilities.UtilJava;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -20,19 +20,23 @@ import java.util.Objects;
  * <p>Rotation follows the Hytale SDK convention where {@link TransformComponent#getRotation()}
  * returns a {@link Vector3f} with x=pitch, y=yaw, z=roll.</p>
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class EntityLocation implements IEntityLocation {
 
-    private final World world;
+    private final String worldName;
     private final double x, y, z;
     private final float yaw, pitch;
+
+    private World world;
+    private Chunk chunk;
+    private BlockLocation blockLocation;
 
     /**
      * Creates an EntityLocation with no rotation (yaw/pitch both 0).
      */
     public EntityLocation(final World world, final double x, final double y, final double z) {
-        this(world, x, y, z, 0.0F, 0.0F);
+        this(world.getName(), x, y, z, 0.0F, 0.0F);
     }
 
     /**
@@ -47,26 +51,48 @@ public class EntityLocation implements IEntityLocation {
      * Rotation is mapped as: yaw = vector3f.y, pitch = vector3f.x.
      */
     public static EntityLocation of(final World world, final Vector3d vector3d, final Vector3f vector3f) {
-        return new EntityLocation(world, vector3d.getX(), vector3d.getY(), vector3d.getZ(), vector3f.getY(), vector3f.getX());
+        return new EntityLocation(world.getName(), vector3d.getX(), vector3d.getY(), vector3d.getZ(), vector3f.getY(), vector3f.getX());
+    }
+
+    /**
+     * Returns the world this entity location belongs to.
+     * Lazily resolves and caches the World instance from the world name.
+     */
+    @Override
+    public World getWorld() {
+        if (this.world == null) {
+            this.world = Universe.get().getWorld(this.getWorldName());
+        }
+
+        return this.world;
     }
 
     /**
      * Returns the chunk this entity location falls within.
-     * Uses {@link Math#floor} to handle negative coordinates correctly before bit shifting.
+     * Lazily resolves and caches the Chunk instance using bit shift of 5 (Hytale chunks are 32 blocks wide).
      */
     @Override
     public Chunk getChunk() {
-        return new Chunk(this.getWorld(), (int) Math.floor(this.getX()) >> 5, (int) Math.floor(this.getZ()) >> 5);
+        if (this.chunk == null) {
+            this.chunk = new Chunk(this.getWorldName(), (int) Math.floor(this.getX()) >> 5, (int) Math.floor(this.getZ()) >> 5);
+        }
+
+        return this.chunk;
     }
 
     /**
      * Converts this entity location to a block location by flooring each coordinate.
+     * Lazily resolves and caches the BlockLocation instance.
      * Uses {@link Math#floor} to handle negative coordinates correctly
      * (e.g. -0.5 becomes -1, not 0).
      */
     @Override
     public BlockLocation toBlockLocation() {
-        return new BlockLocation(this.getWorld(), (int) Math.floor(this.getX()), (int) Math.floor(this.getY()), (int) Math.floor(this.getZ()));
+        if (this.blockLocation == null) {
+            this.blockLocation = new BlockLocation(this.getWorldName(), (int) Math.floor(this.getX()), (int) Math.floor(this.getY()), (int) Math.floor(this.getZ()));
+        }
+
+        return this.blockLocation;
     }
 
     /**
@@ -74,7 +100,7 @@ public class EntityLocation implements IEntityLocation {
      */
     public static LinkedHashMap<String, Object> serialize(final EntityLocation entityLocation) {
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
-            map.put("WORLD", entityLocation.getWorld().getName());
+            map.put("WORLD", entityLocation.getWorldName());
             map.put("X", entityLocation.getX());
             map.put("Y", entityLocation.getY());
             map.put("Z", entityLocation.getZ());
@@ -96,23 +122,18 @@ public class EntityLocation implements IEntityLocation {
         final Float yaw = UtilJava.cast(Float.class, serializedMap.get("YAW"));
         final Float pitch = UtilJava.cast(Float.class, serializedMap.get("PITCH"));
 
-        final World world = Universe.get().getWorld(worldName);
-        if (world == null) {
-            return null;
-        }
-
-        return new EntityLocation(world, x, y, z, yaw, pitch);
+        return new EntityLocation(worldName, x, y, z, yaw, pitch);
     }
 
     @Override
     public String toString() {
-        return "%s{world=%s, x=%s, y=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
+        return "%s{world=%s, x=%s, y=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorldName(), this.getX(), this.getY(), this.getZ());
     }
 
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof final EntityLocation entityLocation) {
-            if (!(entityLocation.getWorld().getName().equals(this.getWorld().getName()))) {
+            if (!(entityLocation.getWorldName().equals(this.getWorldName()))) {
                 return false;
             }
 
@@ -124,6 +145,6 @@ public class EntityLocation implements IEntityLocation {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
+        return Objects.hash(this.getWorldName(), this.getX(), this.getY(), this.getZ());
     }
 }

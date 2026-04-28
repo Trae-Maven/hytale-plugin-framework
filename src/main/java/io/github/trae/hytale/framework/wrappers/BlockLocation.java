@@ -6,8 +6,8 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import io.github.trae.hytale.framework.wrappers.interfaces.IBlockLocation;
 import io.github.trae.utilities.UtilJava;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -16,12 +16,15 @@ import java.util.Objects;
  * Represents an integer-precision block position within a world.
  * Used for block-level operations such as getting/setting block types.
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class BlockLocation implements IBlockLocation {
 
-    private final World world;
+    private final String worldName;
     private final int x, y, z;
+
+    private World world;
+    private Chunk chunk;
 
     /**
      * Creates a BlockLocation from a Hytale SDK {@link Vector3i}.
@@ -31,16 +34,33 @@ public class BlockLocation implements IBlockLocation {
      * @return a new BlockLocation
      */
     public static BlockLocation of(final World world, final Vector3i vector3i) {
-        return new BlockLocation(world, vector3i.getX(), vector3i.getY(), vector3i.getZ());
+        return new BlockLocation(world.getName(), vector3i.getX(), vector3i.getY(), vector3i.getZ());
+    }
+
+    /**
+     * Returns the world this block location belongs to.
+     * Lazily resolves and caches the World instance from the world name.
+     */
+    @Override
+    public World getWorld() {
+        if (this.world == null) {
+            this.world = Universe.get().getWorld(this.getWorldName());
+        }
+
+        return this.world;
     }
 
     /**
      * Returns the chunk this block location falls within.
-     * Uses bit shift of 5 (Hytale chunks are 32 blocks wide).
+     * Lazily resolves and caches the Chunk instance using bit shift of 5 (Hytale chunks are 32 blocks wide).
      */
     @Override
     public Chunk getChunk() {
-        return new Chunk(this.getWorld(), this.getX() >> 5, this.getZ() >> 5);
+        if (this.chunk == null) {
+            this.chunk = new Chunk(this.getWorldName(), this.getX() >> 5, this.getZ() >> 5);
+        }
+
+        return this.chunk;
     }
 
     /**
@@ -56,7 +76,7 @@ public class BlockLocation implements IBlockLocation {
      */
     public static LinkedHashMap<String, Object> serialize(final BlockLocation blockLocation) {
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
-            map.put("WORLD", blockLocation.getWorld().getName());
+            map.put("WORLD", blockLocation.getWorldName());
             map.put("X", blockLocation.getX());
             map.put("Y", blockLocation.getY());
             map.put("Z", blockLocation.getZ());
@@ -74,23 +94,18 @@ public class BlockLocation implements IBlockLocation {
         final Integer y = UtilJava.cast(Integer.class, serializedMap.get("Y"));
         final Integer z = UtilJava.cast(Integer.class, serializedMap.get("Z"));
 
-        final World world = Universe.get().getWorld(worldName);
-        if (world == null) {
-            return null;
-        }
-
-        return new BlockLocation(world, x, y, z);
+        return new BlockLocation(worldName, x, y, z);
     }
 
     @Override
     public String toString() {
-        return "%s{world=%s, x=%s, y=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
+        return "%s{world=%s, x=%s, y=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorldName(), this.getX(), this.getY(), this.getZ());
     }
 
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof final BlockLocation blockLocation) {
-            if (!(blockLocation.getWorld().getName().equals(this.getWorld().getName()))) {
+            if (!(blockLocation.getWorldName().equals(this.getWorldName()))) {
                 return false;
             }
 
@@ -102,6 +117,6 @@ public class BlockLocation implements IBlockLocation {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getWorld().getName(), this.getX(), this.getY(), this.getZ());
+        return Objects.hash(this.getWorldName(), this.getX(), this.getY(), this.getZ());
     }
 }

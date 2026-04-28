@@ -1,11 +1,14 @@
 package io.github.trae.hytale.framework.wrappers.interfaces;
 
 import com.hypixel.hytale.server.core.entity.Entity;
+import com.hypixel.hytale.server.core.universe.world.World;
 import io.github.trae.hytale.framework.wrappers.BlockLocation;
 
 import java.util.List;
 
 public interface IChunk {
+
+    World getWorld();
 
     BlockLocation getBlockAt(final int blockX, final int blockY, final int blockZ);
 

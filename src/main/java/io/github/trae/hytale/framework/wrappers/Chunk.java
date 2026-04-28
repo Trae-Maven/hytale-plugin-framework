@@ -13,8 +13,8 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hytale.framework.wrappers.interfaces.IChunk;
 import io.github.trae.utilities.UtilJava;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -27,7 +27,7 @@ import java.util.Objects;
  * Chunks are identified by their X/Z coordinates and have no Y component,
  * as they span the full world height (0-319).
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class Chunk implements IChunk {
 
@@ -61,11 +61,26 @@ public class Chunk implements IChunk {
      */
     public static final int VOLUME = WIDTH * HEIGHT * DEPTH;
 
-    private final World world;
+    private final String worldName;
     private final int x, z;
 
+    private World world;
+
     public static Chunk of(final World world, final Vector3d vector3d) {
-        return new Chunk(world, (int) Math.floor(vector3d.getX()) >> 5, (int) Math.floor(vector3d.getZ()) >> 5);
+        return new Chunk(world.getName(), (int) Math.floor(vector3d.getX()) >> 5, (int) Math.floor(vector3d.getZ()) >> 5);
+    }
+
+    /**
+     * Returns the world this chunk belongs to.
+     * Lazily resolves and caches the World instance from the world name.
+     */
+    @Override
+    public World getWorld() {
+        if (this.world == null) {
+            this.world = Universe.get().getWorld(this.getWorldName());
+        }
+
+        return this.world;
     }
 
     /**
@@ -73,7 +88,7 @@ public class Chunk implements IChunk {
      */
     @Override
     public BlockLocation getBlockAt(final int blockX, final int blockY, final int blockZ) {
-        return new BlockLocation(this.getWorld(), blockX, blockY, blockZ);
+        return new BlockLocation(this.getWorldName(), blockX, blockY, blockZ);
     }
 
     /**
@@ -89,7 +104,7 @@ public class Chunk implements IChunk {
             for (int blockX = minBlockX; blockX < minBlockX + WIDTH; blockX++) {
                 for (int blockZ = minBlockZ; blockZ < minBlockZ + DEPTH; blockZ++) {
                     for (int blockY = 0; blockY < HEIGHT; blockY++) {
-                        list.add(new BlockLocation(this.getWorld(), blockX, blockY, blockZ));
+                        list.add(new BlockLocation(this.getWorldName(), blockX, blockY, blockZ));
                     }
                 }
             }
@@ -110,13 +125,13 @@ public class Chunk implements IChunk {
             final int maxBlockZ = minBlockZ + DEPTH - 1;
 
             for (int blockX = minBlockX; blockX <= maxBlockX; blockX++) {
-                list.add(new BlockLocation(this.getWorld(), blockX, blockY, minBlockZ));
-                list.add(new BlockLocation(this.getWorld(), blockX, blockY, maxBlockZ));
+                list.add(new BlockLocation(this.getWorldName(), blockX, blockY, minBlockZ));
+                list.add(new BlockLocation(this.getWorldName(), blockX, blockY, maxBlockZ));
             }
 
             for (int blockZ = minBlockZ + 1; blockZ < maxBlockZ; blockZ++) {
-                list.add(new BlockLocation(this.getWorld(), minBlockX, blockY, blockZ));
-                list.add(new BlockLocation(this.getWorld(), maxBlockX, blockY, blockZ));
+                list.add(new BlockLocation(this.getWorldName(), minBlockX, blockY, blockZ));
+                list.add(new BlockLocation(this.getWorldName(), maxBlockX, blockY, blockZ));
             }
         });
     }
@@ -145,15 +160,15 @@ public class Chunk implements IChunk {
             for (int blockX = minBlockX; blockX <= maxBlockX; blockX++) {
                 final int localX = blockX & MASK;
 
-                list.add(new BlockLocation(this.getWorld(), blockX, worldChunk.getHeight(localX, 0), minBlockZ));
-                list.add(new BlockLocation(this.getWorld(), blockX, worldChunk.getHeight(localX, MASK), maxBlockZ));
+                list.add(new BlockLocation(this.getWorldName(), blockX, worldChunk.getHeight(localX, 0), minBlockZ));
+                list.add(new BlockLocation(this.getWorldName(), blockX, worldChunk.getHeight(localX, MASK), maxBlockZ));
             }
 
             for (int blockZ = minBlockZ + 1; blockZ < maxBlockZ; blockZ++) {
                 final int localZ = blockZ & MASK;
 
-                list.add(new BlockLocation(this.getWorld(), minBlockX, worldChunk.getHeight(0, localZ), blockZ));
-                list.add(new BlockLocation(this.getWorld(), maxBlockX, worldChunk.getHeight(MASK, localZ), blockZ));
+                list.add(new BlockLocation(this.getWorldName(), minBlockX, worldChunk.getHeight(0, localZ), blockZ));
+                list.add(new BlockLocation(this.getWorldName(), maxBlockX, worldChunk.getHeight(MASK, localZ), blockZ));
             }
         });
     }
@@ -218,7 +233,7 @@ public class Chunk implements IChunk {
      */
     public static LinkedHashMap<String, Object> serialize(final Chunk chunk) {
         return UtilJava.createMap(new LinkedHashMap<>(), map -> {
-            map.put("WORLD", chunk.getWorld().getName());
+            map.put("WORLD", chunk.getWorldName());
             map.put("X", chunk.getX());
             map.put("Z", chunk.getZ());
         });
@@ -234,23 +249,18 @@ public class Chunk implements IChunk {
         final Integer x = UtilJava.cast(Integer.class, serializedMap.get("X"));
         final Integer z = UtilJava.cast(Integer.class, serializedMap.get("Z"));
 
-        final World world = Universe.get().getWorld(worldName);
-        if (world == null) {
-            return null;
-        }
-
-        return new Chunk(world, x, z);
+        return new Chunk(worldName, x, z);
     }
 
     @Override
     public String toString() {
-        return "%s{world=%s, x=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorld().getName(), this.getX(), this.getZ());
+        return "%s{world=%s, x=%s, z=%s}".formatted(this.getClass().getSimpleName(), this.getWorldName(), this.getX(), this.getZ());
     }
 
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof final Chunk chunk) {
-            if (!(chunk.getWorld().getName().equals(this.getWorld().getName()))) {
+            if (!(chunk.getWorldName().equals(this.getWorldName()))) {
                 return false;
             }
 
@@ -262,6 +272,6 @@ public class Chunk implements IChunk {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getWorld().getName(), this.getX(), this.getZ());
+        return Objects.hash(this.getWorldName(), this.getX(), this.getZ());
     }
 }
