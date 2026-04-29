@@ -6,7 +6,9 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncC
 import io.github.trae.hf.Manager;
 import io.github.trae.hf.Module;
 import io.github.trae.hytale.framework.HytalePlugin;
+import io.github.trae.hytale.framework.command.settings.CommandSettings;
 import io.github.trae.hytale.framework.utility.UtilArgument;
+import lombok.Getter;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
@@ -18,23 +20,34 @@ import java.util.concurrent.CompletableFuture;
  * @param <BasePlugin>  the plugin type
  * @param <BaseManager> the manager this command belongs to
  */
+@Getter
 public abstract class AsyncCommand<BasePlugin extends HytalePlugin, BaseManager extends Manager<BasePlugin>> extends AbstractAsyncCommand implements Module<BasePlugin, BaseManager> {
 
-    public AsyncCommand(final String name, final String description, final boolean requiresConfirmation) {
+    private final Object requiredPermission;
+
+    public AsyncCommand(final String name, final String description, final Object requiredPermission, final boolean requiresConfirmation) {
         super(name, description, requiresConfirmation);
+
+        this.requiredPermission = requiredPermission;
 
         // Override Hytale default fallback message for unrecognised arguments
         this.setAllowsExtraArguments(true);
     }
 
-    public AsyncCommand(final String name, final String description) {
-        this(name, description, false);
+    public AsyncCommand(final String name, final String description, final Object requiredPermission) {
+        this(name, description, requiredPermission, false);
     }
 
     @Nonnull
     @Override
     protected CompletableFuture<Void> executeAsync(@Nonnull final CommandContext commandContext) {
-        return CompletableFuture.runAsync(() -> this.execute(commandContext.sender(), UtilArgument.getArguments(commandContext, 1)));
+        return CompletableFuture.runAsync(() -> {
+            final CommandSender sender = commandContext.sender();
+
+            if (CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission())) {
+                this.execute(sender, UtilArgument.getArguments(commandContext, 1));
+            }
+        });
     }
 
     /**

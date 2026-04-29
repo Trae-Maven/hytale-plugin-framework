@@ -10,7 +10,9 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hf.Manager;
 import io.github.trae.hf.Module;
 import io.github.trae.hytale.framework.HytalePlugin;
+import io.github.trae.hytale.framework.command.settings.CommandSettings;
 import io.github.trae.hytale.framework.utility.UtilArgument;
+import lombok.Getter;
 
 import javax.annotation.Nonnull;
 
@@ -21,22 +23,29 @@ import javax.annotation.Nonnull;
  * @param <BasePlugin>  the plugin type
  * @param <BaseManager> the manager this command belongs to
  */
+@Getter
 public abstract class PlayerCommand<BasePlugin extends HytalePlugin, BaseManager extends Manager<BasePlugin>> extends AbstractPlayerCommand implements Module<BasePlugin, BaseManager> {
 
-    public PlayerCommand(final String name, final String description, final boolean requiresConfirmation) {
+    private final Object requiredPermission;
+
+    public PlayerCommand(final String name, final String description, final Object requiredPermission, final boolean requiresConfirmation) {
         super(name, description, requiresConfirmation);
+
+        this.requiredPermission = requiredPermission;
 
         // Override Hytale default fallback message for unrecognised arguments
         this.setAllowsExtraArguments(true);
     }
 
-    public PlayerCommand(final String name, final String description) {
-        this(name, description, false);
+    public PlayerCommand(final String name, final Object requiredPermission, final String description) {
+        this(name, description, requiredPermission, false);
     }
 
     @Override
     protected void execute(@Nonnull final CommandContext commandContext, @Nonnull final Store<EntityStore> store, @Nonnull final Ref<EntityStore> ref, @Nonnull final PlayerRef playerRef, @Nonnull final World world) {
-        this.execute(playerRef, UtilArgument.getArguments(commandContext, 1));
+        if (CommandSettings.getPermissionCheckPredicate().test(commandContext.sender(), this.getRequiredArguments())) {
+            this.execute(playerRef, UtilArgument.getArguments(commandContext, 1));
+        }
     }
 
     /**
