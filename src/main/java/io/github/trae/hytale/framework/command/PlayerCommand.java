@@ -37,7 +37,7 @@ public abstract class PlayerCommand<BasePlugin extends HytalePlugin, BaseManager
         this.setAllowsExtraArguments(true);
     }
 
-    public PlayerCommand(final String name, final Object requiredPermission, final String description) {
+    public PlayerCommand(final String name, final String description, final Object requiredPermission) {
         this(name, description, requiredPermission, false);
     }
 
