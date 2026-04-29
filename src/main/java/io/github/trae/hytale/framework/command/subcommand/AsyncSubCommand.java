@@ -44,7 +44,7 @@ public abstract class AsyncSubCommand<BasePlugin extends HytalePlugin, BaseModul
         return CompletableFuture.runAsync(() -> {
             final CommandSender sender = commandContext.sender();
 
-            if (CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission())) {
+            if (CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission(), true)) {
                 this.execute(sender, UtilArgument.getArguments(commandContext, 2));
             }
         });
