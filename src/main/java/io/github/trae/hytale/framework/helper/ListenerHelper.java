@@ -132,7 +132,7 @@ public class ListenerHelper extends AbstractHelper<Listener> {
         final EventHandler annotation = method.getAnnotation(EventHandler.class);
 
         // Async events are registered with thenApply chaining on the CompletableFuture
-        if (eventClass.isAssignableFrom(IAsyncEvent.class)) {
+        if (IAsyncEvent.class.isAssignableFrom(eventClass)) {
             return eventRegistry.registerAsync((short) annotation.priority(), eventClass, completableFuture ->
                     completableFuture.thenApply(event -> {
                         try {
