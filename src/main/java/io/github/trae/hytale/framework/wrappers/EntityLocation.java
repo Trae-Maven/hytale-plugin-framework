@@ -96,6 +96,17 @@ public class EntityLocation implements IEntityLocation {
     }
 
     /**
+     * Converts this entity location to a {@link Vector3d} position vector
+     * with yaw and pitch assigned.
+     *
+     * @return the double position vector with rotation
+     */
+    @Override
+    public Vector3d toVector() {
+        return new Vector3d(this.getX(), this.getY(), this.getZ()).assign(this.getYaw(), this.getPitch());
+    }
+
+    /**
      * Serializes this EntityLocation to a map for persistence.
      */
     public static LinkedHashMap<String, Object> serialize(final EntityLocation entityLocation) {

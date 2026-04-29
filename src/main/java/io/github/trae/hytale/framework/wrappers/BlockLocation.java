@@ -72,6 +72,16 @@ public class BlockLocation implements IBlockLocation {
     }
 
     /**
+     * Converts this block location to a {@link Vector3i} position vector.
+     *
+     * @return the integer position vector
+     */
+    @Override
+    public Vector3i toVector() {
+        return new Vector3i(this.getX(), this.getY(), this.getZ());
+    }
+
+    /**
      * Serializes this BlockLocation to a map for persistence.
      */
     public static LinkedHashMap<String, Object> serialize(final BlockLocation blockLocation) {
