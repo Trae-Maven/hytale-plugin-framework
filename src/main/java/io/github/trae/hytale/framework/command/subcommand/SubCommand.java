@@ -3,6 +3,8 @@ package io.github.trae.hytale.framework.command.subcommand;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.world.World;
 import io.github.trae.hf.Module;
 import io.github.trae.hf.SubModule;
 import io.github.trae.hytale.framework.HytalePlugin;
@@ -48,6 +50,20 @@ public abstract class SubCommand<BasePlugin extends HytalePlugin, BaseModule ext
     @Override
     protected CompletableFuture<Void> execute(@Nonnull final CommandContext commandContext) {
         final CommandSender sender = commandContext.sender();
+
+        if (sender instanceof final Player player) {
+            final World world = player.getWorld();
+            if (world != null) {
+                final CompletableFuture<Void> future = new CompletableFuture<>();
+                world.execute(() -> {
+                    if (CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission(), true)) {
+                        this.execute(sender, UtilArgument.getArguments(commandContext, 2));
+                    }
+                    future.complete(null);
+                });
+                return future;
+            }
+        }
 
         if (CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission(), true)) {
             this.execute(sender, UtilArgument.getArguments(commandContext, 2));

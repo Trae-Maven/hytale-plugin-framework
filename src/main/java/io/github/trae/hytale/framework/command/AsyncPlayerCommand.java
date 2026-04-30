@@ -50,11 +50,14 @@ public abstract class AsyncPlayerCommand<BasePlugin extends HytalePlugin, BaseMa
     @Nonnull
     @Override
     protected CompletableFuture<Void> executeAsync(@Nonnull final CommandContext commandContext, @Nonnull final Store<EntityStore> store, @Nonnull final Ref<EntityStore> ref, @Nonnull final PlayerRef playerRef, @Nonnull final World world) {
-        return CompletableFuture.runAsync(() -> {
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        world.execute(() -> {
             if (CommandSettings.getPermissionCheckPredicate().test(commandContext.sender(), this.getRequiredPermission(), true)) {
                 this.execute(playerRef, UtilArgument.getArguments(commandContext, 1));
             }
+            future.complete(null);
         });
+        return future;
     }
 
     /**
