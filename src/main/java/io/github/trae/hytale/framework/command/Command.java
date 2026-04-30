@@ -39,6 +39,11 @@ public abstract class Command<BasePlugin extends HytalePlugin, BaseManager exten
         this(name, description, requiredPermission, false);
     }
 
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
+
     @Nullable
     @Override
     protected CompletableFuture<Void> execute(@Nonnull final CommandContext commandContext) {

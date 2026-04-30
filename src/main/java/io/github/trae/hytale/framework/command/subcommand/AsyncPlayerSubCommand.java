@@ -42,6 +42,11 @@ public abstract class AsyncPlayerSubCommand<BasePlugin extends HytalePlugin, Bas
         this(name, description, requiredPermission, false);
     }
 
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
+
     @Nonnull
     @Override
     protected CompletableFuture<Void> executeAsync(@Nonnull final CommandContext commandContext, @Nonnull final Store<EntityStore> store, @Nonnull final Ref<EntityStore> ref, @Nonnull final PlayerRef playerRef, @Nonnull final World world) {

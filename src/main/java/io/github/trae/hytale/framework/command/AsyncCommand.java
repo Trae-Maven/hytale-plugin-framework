@@ -38,6 +38,11 @@ public abstract class AsyncCommand<BasePlugin extends HytalePlugin, BaseManager 
         this(name, description, requiredPermission, false);
     }
 
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
+
     @Nonnull
     @Override
     protected CompletableFuture<Void> executeAsync(@Nonnull final CommandContext commandContext) {

@@ -42,6 +42,11 @@ public abstract class PlayerCommand<BasePlugin extends HytalePlugin, BaseManager
     }
 
     @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
+
+    @Override
     protected void execute(@Nonnull final CommandContext commandContext, @Nonnull final Store<EntityStore> store, @Nonnull final Ref<EntityStore> ref, @Nonnull final PlayerRef playerRef, @Nonnull final World world) {
         if (CommandSettings.getPermissionCheckPredicate().test(commandContext.sender(), this.getRequiredPermission(), true)) {
             this.execute(playerRef, UtilArgument.getArguments(commandContext, 1));
