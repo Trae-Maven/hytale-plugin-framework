@@ -2,15 +2,19 @@ package io.github.trae.hytale.framework.utility;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.receiver.IMessageReceiver;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import io.github.trae.hytale.framework.utility.enums.ChatColor;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.quic.QuicStreamChannel;
 import lombok.experimental.UtilityClass;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -90,5 +94,30 @@ public class UtilPlayer {
         }
 
         return Optional.ofNullable(inetSocketAddress.getAddress().getHostAddress());
+    }
+
+    /**
+     * Search all online players for a {@link PlayerRef} matching the given input
+     * by username, using {@link UtilSearch#search} with exact and partial matching.
+     *
+     * @param messageReceiver the receiver to send result or ambiguity messages to
+     * @param input           the username or partial username to search for
+     * @param inform          whether to send a result message to the receiver
+     * @return an {@link Optional} containing the matched player reference,
+     * or empty if zero or multiple matches were found
+     */
+    public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform) {
+        return UtilSearch.search(
+                Universe.get().getPlayers(),
+                playerRef -> playerRef.getUsername().equalsIgnoreCase(input),
+                playerRef -> playerRef.getUsername().toLowerCase(Locale.ROOT).contains(input.toLowerCase(Locale.ROOT)),
+                null,
+                string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
+                playerRef -> UtilColor.serialize(ChatColor.YELLOW.getColor(), playerRef.getUsername()),
+                "Player Search",
+                messageReceiver,
+                input,
+                inform
+        );
     }
 }
