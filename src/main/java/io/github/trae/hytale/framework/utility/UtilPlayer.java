@@ -97,14 +97,15 @@ public class UtilPlayer {
     }
 
     /**
-     * Search all online players for a {@link PlayerRef} matching the given input
-     * by username, using {@link UtilSearch#search} with exact and partial matching.
+     * Search online players for a {@link PlayerRef} by username.
+     * <p>
+     * Delegates to {@link UtilSearch#search} with case-insensitive exact
+     * and partial (contains) matching on {@link PlayerRef#getUsername()}.
      *
-     * @param messageReceiver the receiver to send result or ambiguity messages to
-     * @param input           the username or partial username to search for
+     * @param messageReceiver receiver for result or ambiguity messages
+     * @param input           username or partial username to search for
      * @param inform          whether to send a result message to the receiver
-     * @return an {@link Optional} containing the matched player reference,
-     * or empty if zero or multiple matches were found
+     * @return the matched player reference, or {@link Optional#empty()} if zero or multiple matches were found
      */
     public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform) {
         return UtilSearch.search(
@@ -113,7 +114,7 @@ public class UtilPlayer {
                 playerRef -> playerRef.getUsername().toLowerCase(Locale.ROOT).contains(input.toLowerCase(Locale.ROOT)),
                 null,
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
-                playerRef -> UtilColor.serialize(ChatColor.YELLOW.getColor(), playerRef.getUsername()),
+                PlayerRef::getUsername,
                 "Player Search",
                 messageReceiver,
                 input,
