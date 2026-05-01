@@ -3,6 +3,7 @@ package io.github.trae.hytale.framework.command;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -44,6 +45,11 @@ public abstract class PlayerCommand<BasePlugin extends HytalePlugin, BaseManager
     @Override
     protected boolean canGeneratePermission() {
         return false;
+    }
+
+    @Override
+    public boolean hasPermission(@Nonnull final CommandSender sender) {
+        return CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission(), false);
     }
 
     @Override

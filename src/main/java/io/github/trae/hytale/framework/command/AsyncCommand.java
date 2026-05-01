@@ -45,6 +45,11 @@ public abstract class AsyncCommand<BasePlugin extends HytalePlugin, BaseManager 
         return false;
     }
 
+    @Override
+    public boolean hasPermission(@Nonnull final CommandSender sender) {
+        return CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission(), false);
+    }
+
     @Nonnull
     @Override
     protected CompletableFuture<Void> executeAsync(@Nonnull final CommandContext commandContext) {

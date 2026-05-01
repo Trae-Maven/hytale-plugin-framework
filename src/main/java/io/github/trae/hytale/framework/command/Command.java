@@ -46,6 +46,11 @@ public abstract class Command<BasePlugin extends HytalePlugin, BaseManager exten
         return false;
     }
 
+    @Override
+    public boolean hasPermission(@Nonnull final CommandSender sender) {
+        return CommandSettings.getPermissionCheckPredicate().test(sender, this.getRequiredPermission(), false);
+    }
+
     @Nullable
     @Override
     protected CompletableFuture<Void> execute(@Nonnull final CommandContext commandContext) {
