@@ -2,7 +2,9 @@ package io.github.trae.hytale.framework;
 
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
+import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
 import com.hypixel.hytale.server.core.io.adapter.PacketWatcher;
+import com.hypixel.hytale.server.core.io.adapter.PlayerPacketFilter;
 import com.hypixel.hytale.server.core.io.adapter.PlayerPacketWatcher;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -38,6 +40,8 @@ import javax.annotation.Nonnull;
  *   <li>{@link Listener} — registered with the event bus via {@link ListenerHelper}</li>
  *   <li>{@link PacketWatcher} — registered with the packet pipeline via {@link PacketWatcherHelper}</li>
  *   <li>{@link PlayerPacketWatcher} — registered with the packet pipeline via {@link PlayerPacketWatcherHelper}</li>
+ *   <li>{@link PacketFilter} — registered with the packet pipeline via {@link PacketFilterHelper}</li>
+ *   <li>{@link PlayerPacketFilter} — registered with the packet pipeline via {@link PlayerPacketFilterHelper}</li>
  *   <li>{@link EntityEventSystem} — registered with the ECS registry via {@link SystemHelper}</li>
  *   <li>{@link AbstractCommand} as {@link Module} — registered with the command system via {@link CommandHelper}</li>
  *   <li>{@link AbstractCommand} as {@link SubModule} — attached to the parent command as a subcommand</li>
@@ -50,6 +54,8 @@ import javax.annotation.Nonnull;
  * @see ListenerHelper
  * @see PacketWatcherHelper
  * @see PlayerPacketWatcherHelper
+ * @see PacketFilterHelper
+ * @see PlayerPacketFilterHelper
  * @see SystemHelper
  * @see CommandHelper
  */
@@ -82,6 +88,16 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     private final PlayerPacketWatcherHelper playerPacketWatcherHelper;
 
     /**
+     * Helper managing packet filter registrations for this plugin.
+     */
+    private final PacketFilterHelper packetFilterHelper;
+
+    /**
+     * Helper managing player packet filter registrations for this plugin.
+     */
+    private final PlayerPacketFilterHelper playerPacketFilterHelper;
+
+    /**
      * Creates a new {@link HytalePlugin} and initializes all framework helpers.
      *
      * @param javaPluginInit the Hytale-provided plugin initialization context
@@ -96,6 +112,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
         this.commandHelper = new CommandHelper(this);
         this.packetWatcherHelper = new PacketWatcherHelper(this);
         this.playerPacketWatcherHelper = new PlayerPacketWatcherHelper(this);
+        this.packetFilterHelper = new PacketFilterHelper(this);
+        this.playerPacketFilterHelper = new PlayerPacketFilterHelper(this);
     }
 
     /**
@@ -141,6 +159,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      *   <li>{@link Listener} — registered with the event bus</li>
      *   <li>{@link PacketWatcher} — registered with the packet pipeline</li>
      *   <li>{@link PlayerPacketWatcher} — registered with the packet pipeline</li>
+     *   <li>{@link PacketFilter} — registered with the packet pipeline</li>
+     *   <li>{@link PlayerPacketFilter} — registered with the packet pipeline</li>
      *   <li>{@link EntityEventSystem} — registered with the ECS store registry</li>
      *   <li>{@link AbstractCommand} + {@link Module} — queued as a root command</li>
      *   <li>{@link AbstractCommand} + {@link SubModule} — attached to the parent
@@ -161,6 +181,14 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
         if (instance instanceof final PlayerPacketWatcher playerPacketWatcher) {
             this.playerPacketWatcherHelper.register(playerPacketWatcher);
+        }
+
+        if (instance instanceof final PacketFilter packetFilter) {
+            this.packetFilterHelper.register(packetFilter);
+        }
+
+        if (instance instanceof final PlayerPacketFilter playerPacketFilter) {
+            this.playerPacketFilterHelper.register(playerPacketFilter);
         }
 
         if (instance instanceof EntityEventSystem<?, ?> || instance instanceof ICustomTickingSystem<?>) {
@@ -188,6 +216,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      *   <li>{@link Listener} — unregistered from the event bus</li>
      *   <li>{@link PacketWatcher} — unregistered from the packet pipeline</li>
      *   <li>{@link PlayerPacketWatcher} — unregistered from the packet pipeline</li>
+     *   <li>{@link PacketFilter} — unregistered from the packet pipeline</li>
+     *   <li>{@link PlayerPacketFilter} — unregistered from the packet pipeline</li>
      *   <li>{@link EntityEventSystem} — unregistered from the ECS store registry</li>
      *   <li>{@link AbstractCommand} + {@link Module} — unregistered from the command system</li>
      *   <li>{@link AbstractCommand} + {@link SubModule} — removed from the parent command's
@@ -208,6 +238,14 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
         if (instance instanceof final PlayerPacketWatcher playerPacketWatcher) {
             this.playerPacketWatcherHelper.unregister(playerPacketWatcher);
+        }
+
+        if (instance instanceof final PacketFilter packetFilter) {
+            this.packetFilterHelper.unregister(packetFilter);
+        }
+
+        if (instance instanceof final PlayerPacketFilter playerPacketFilter) {
+            this.playerPacketFilterHelper.unregister(playerPacketFilter);
         }
 
         if (instance instanceof EntityEventSystem<?, ?> || instance instanceof ICustomTickingSystem<?>) {
