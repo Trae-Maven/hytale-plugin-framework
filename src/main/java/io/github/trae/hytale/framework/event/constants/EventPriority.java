@@ -16,17 +16,17 @@ public class EventPriority {
      * Executed before all others. Should only be used for observation and initial setup.
      * Handlers at this priority should NEVER modify the event.
      */
-    public static final int BASELINE = Integer.MIN_VALUE;
+    public static final int BASELINE = Short.MIN_VALUE;
 
     /**
      * Executed after BASELINE. For handlers that need to run before most others.
      */
-    public static final int LOWEST = Integer.MIN_VALUE + 1;
+    public static final int LOWEST = Short.MIN_VALUE + 1;
 
     /**
      * Executed third. For early processing.
      */
-    public static final int LOW = Integer.MIN_VALUE + 2;
+    public static final int LOW = Short.MIN_VALUE + 2;
 
     /**
      * Default priority. For standard handler logic.
@@ -36,15 +36,15 @@ public class EventPriority {
     /**
      * Executed after NORMAL. For late processing such as validation and filtering.
      */
-    public static final int HIGH = Integer.MAX_VALUE - 2;
+    public static final int HIGH = Short.MAX_VALUE - 2;
 
     /**
      * Executed second-to-last. For handlers that need final say on cancellation.
      */
-    public static final int HIGHEST = Integer.MAX_VALUE - 1;
+    public static final int HIGHEST = Short.MAX_VALUE - 1;
 
     /**
      * Executed last. Should only be used for monitoring and logging. Handlers at this priority should NEVER modify the event.
      */
-    public static final int MONITOR = Integer.MAX_VALUE;
+    public static final int MONITOR = Short.MAX_VALUE;
 }
