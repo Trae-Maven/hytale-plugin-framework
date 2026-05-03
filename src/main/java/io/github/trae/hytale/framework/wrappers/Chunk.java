@@ -174,6 +174,32 @@ public class Chunk implements IChunk {
     }
 
     /**
+     * Returns all chunks within a square radius around this chunk.
+     * The radius is defined in chunk units, producing a grid of
+     * {@code (2 * distance + 1) x (2 * distance + 1)} chunks centered on this chunk.
+     *
+     * @param distance    the radius in chunks from this chunk
+     * @param includeSelf whether to include this chunk in the result
+     * @return a list of nearby chunks within the specified distance
+     */
+    @Override
+    public List<Chunk> getNearbyChunks(final int distance, final boolean includeSelf) {
+        final int side = 2 * distance + 1;
+
+        return UtilJava.createCollection(new ArrayList<>(includeSelf ? side * side : side * side - 1), list -> {
+            for (int distanceX = -distance; distanceX <= distance; distanceX++) {
+                for (int distanceZ = -distance; distanceZ <= distance; distanceZ++) {
+                    if (!(includeSelf) && distanceX == 0 && distanceZ == 0) {
+                        continue;
+                    }
+
+                    list.add(new Chunk(this.getWorldName(), this.getX() + distanceX, this.getZ() + distanceZ));
+                }
+            }
+        });
+    }
+
+    /**
      * Returns all entities in this chunk that are instances of the given type.
      * Scans the chunk's entity holders and resolves entity components via archetype introspection,
      * avoiding the deprecated {@code EntityUtils} methods.
