@@ -95,6 +95,6 @@ public class SidebarCreateEvent extends CustomCancellableEvent implements ISideb
      */
     @Override
     public boolean isCreated() {
-        return this.getTitle() != null && this.getLines() != null && !(this.getLines().isEmpty());
+        return this.getTitle() != null || (this.getLines() != null && !(this.getLines().isEmpty()));
     }
 }
