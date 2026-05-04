@@ -32,7 +32,7 @@ public class Sidebar {
      * <p>Used to distinguish between sidebars from different sources when
      * multiple plugins may contribute sidebar content.</p>
      */
-    private final String id;
+    private final String identifier;
 
     /**
      * The title displayed at the top of the sidebar.

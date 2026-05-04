@@ -19,6 +19,7 @@ import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -122,6 +123,11 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         return this.sidebarMap.containsKey(playerRef.getUuid());
     }
 
+    @Override
+    public boolean hasSidebarByIdentifier(final PlayerRef playerRef, final String identifier) {
+        return Optional.ofNullable(this.sidebarMap.get(playerRef.getUuid())).map(sidebar -> sidebar.getIdentifier().equals(identifier)).orElse(false);
+    }
+
     /**
      * Handles a {@link SidebarCreateEvent} after all plugin listeners have
      * populated it.
@@ -143,7 +149,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
             return;
         }
 
-        this.update(event.getPlayerRef(), new Sidebar(event.getId(), event.getTitle(), event.getLines()));
+        this.update(event.getPlayerRef(), new Sidebar(event.getIdentifier(), event.getTitle(), event.getLines()));
     }
 
     /**
@@ -158,7 +164,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
      */
     @Override
     public void onSidebarUpdateEvent(final SidebarUpdateEvent event) {
-        UtilEvent.dispatch(new SidebarCreateEvent(event.getPlayerRef()));
+        UtilEvent.dispatch(new SidebarCreateEvent(event.getIdentifier(), event.getPlayerRef()));
     }
 
     /**

@@ -13,6 +13,8 @@ public interface IAbstractSidebarManager {
 
     boolean hasSidebar(final PlayerRef playerRef);
 
+    boolean hasSidebarByIdentifier(final PlayerRef playerRef, final String identifier);
+
     void onSidebarCreateEvent(final SidebarCreateEvent event);
 
     void onSidebarUpdateEvent(final SidebarUpdateEvent event);

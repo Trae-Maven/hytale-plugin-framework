@@ -3,6 +3,7 @@ package io.github.trae.hytale.framework.sidebar.events;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import io.github.trae.hytale.framework.event.types.CustomCancellableEvent;
+import io.github.trae.hytale.framework.sidebar.constants.SidebarConstants;
 import io.github.trae.hytale.framework.sidebar.events.interfaces.ISidebarCreateEvent;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,18 @@ import java.util.List;
  * <pre>{@code
  * @EventHandler
  * public void onSidebarCreate(final SidebarCreateEvent event) {
+ *     if (event.isCancelled()) {
+ *         return;
+ *     }
+ *
+ *     if (event.isCreated()) {
+ *         return;
+ *     }
+ *
+ *     if (!event.isIdentifier("FACTIONS")) {
+ *         return;
+ *     }
+ *
  *     event.setTitle(Message.raw("My Server").bold(true));
  *     event.setLines(List.of(
  *         Message.raw("Welcome!"),
@@ -44,18 +57,18 @@ import java.util.List;
 public class SidebarCreateEvent extends CustomCancellableEvent implements ISidebarCreateEvent {
 
     /**
+     * The identifier of the sidebar source.
+     *
+     * <p>Used to distinguish which plugin or module is creating the
+     * sidebar, allowing listeners to filter or respond based on the
+     * source.</p>
+     */
+    private final String identifier;
+
+    /**
      * The player the sidebar is being created for.
      */
     private final PlayerRef playerRef;
-
-    /**
-     * An identifier for the sidebar source.
-     *
-     * <p>Allows plugin listeners to tag the sidebar with an identifier
-     * so that other listeners or systems can determine which plugin
-     * or module created it. Defaults to {@code "DEFAULT"}.</p>
-     */
-    private String id = "DEFAULT";
 
     /**
      * The sidebar title. Set by the plugin listener.
@@ -66,6 +79,11 @@ public class SidebarCreateEvent extends CustomCancellableEvent implements ISideb
      * The sidebar lines. Set by the plugin listener.
      */
     private List<Message> lines;
+
+    @Override
+    public boolean isIdentifier(final String identifier) {
+        return this.getIdentifier().equals(SidebarConstants.DEFAULT_IDENTIFIER) || this.getIdentifier().equals(identifier);
+    }
 
     /**
      * Returns whether the sidebar content has been fully populated by a listener.
