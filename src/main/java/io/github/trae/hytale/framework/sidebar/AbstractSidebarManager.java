@@ -1,18 +1,19 @@
 package io.github.trae.hytale.framework.sidebar;
 
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hf.Manager;
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.sidebar.events.SidebarCreateEvent;
 import io.github.trae.hytale.framework.sidebar.events.SidebarUpdateEvent;
 import io.github.trae.hytale.framework.sidebar.interfaces.IAbstractSidebarManager;
 import io.github.trae.hytale.framework.utility.UtilEvent;
-import io.github.trae.hytale.framework.utility.UtilPlayer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -84,8 +85,6 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         }
 
         final Sidebar previousSidebar = this.sidebarMap.get(playerRef.getUuid());
-
-        this.sidebarMap.put(playerRef.getUuid(), sidebar);
 
         if (previousSidebar == null || previousSidebar.getLines().size() != sidebar.getLines().size()) {
             this.createSidebar(playerRef, sidebar);
@@ -194,7 +193,11 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
             }
         };
 
-        this.execute(playerRef, player -> player.getHudManager().setCustomHud(playerRef, customHud));
+        this.execute(playerRef, player -> {
+            player.getHudManager().setCustomHud(playerRef, customHud);
+
+            this.sidebarMap.put(playerRef.getUuid(), sidebar);
+        });
     }
 
     /**
@@ -250,6 +253,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
                 final CustomUIHud customHud = player.getHudManager().getCustomHud();
                 if (customHud != null) {
                     customHud.update(false, uiCommandBuilder);
+                    this.sidebarMap.put(playerRef.getUuid(), sidebar);
                 }
             });
         }
@@ -266,10 +270,17 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
      * @param consumer  the action to execute with the resolved player
      */
     private void execute(final PlayerRef playerRef, final Consumer<Player> consumer) {
-        UtilPlayer.getPlayer(playerRef).ifPresent(player -> {
-            final World world = player.getWorld();
-            if (world != null) {
-                world.execute(() -> consumer.accept(player));
+        final Ref<EntityStore> playerReference = playerRef.getReference();
+        if (playerReference == null || !(playerReference.isValid())) {
+            return;
+        }
+
+        final World world = playerReference.getStore().getExternalData().getWorld();
+
+        world.execute(() -> {
+            final Player player = playerReference.getStore().getComponent(playerReference, Player.getComponentType());
+            if (player != null) {
+                consumer.accept(player);
             }
         });
     }
