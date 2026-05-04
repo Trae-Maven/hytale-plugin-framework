@@ -16,7 +16,7 @@ import io.github.trae.hytale.framework.event.Listener;
 import io.github.trae.hytale.framework.helper.*;
 import io.github.trae.hytale.framework.plugin.events.PluginInitializeEvent;
 import io.github.trae.hytale.framework.plugin.events.PluginShutdownEvent;
-import io.github.trae.hytale.framework.system.interfaces.ICustomTickingSystem;
+import io.github.trae.hytale.framework.system.interfaces.CustomSystem;
 import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.hytale.framework.utility.UtilTask;
 import io.github.trae.utilities.UtilJava;
@@ -191,8 +191,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
             this.playerPacketFilterHelper.register(playerPacketFilter);
         }
 
-        if (instance instanceof EntityEventSystem<?, ?> || instance instanceof ICustomTickingSystem<?>) {
-            this.systemHelper.register(instance);
+        if (instance instanceof final CustomSystem system) {
+            this.systemHelper.register(system);
         }
 
         // Root commands — queued for bulk registration during initializePlugin()
@@ -248,8 +248,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
             this.playerPacketFilterHelper.unregister(playerPacketFilter);
         }
 
-        if (instance instanceof EntityEventSystem<?, ?> || instance instanceof ICustomTickingSystem<?>) {
-            this.systemHelper.unregister(instance);
+        if (instance instanceof final CustomSystem system) {
+            this.systemHelper.unregister(system);
         }
 
         // Root commands — unregistered from the command system

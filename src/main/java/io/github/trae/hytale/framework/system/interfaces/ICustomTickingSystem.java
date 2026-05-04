@@ -10,7 +10,7 @@ import io.github.trae.hytale.framework.system.data.SystemContext;
  *
  * @param <ECS_TYPE> the ECS store type (e.g. {@code EntityStore})
  */
-public interface ICustomTickingSystem<ECS_TYPE> {
+public interface ICustomTickingSystem<ECS_TYPE> extends CustomSystem {
 
     /**
      * Called each tick for every entity matching the system's query.
