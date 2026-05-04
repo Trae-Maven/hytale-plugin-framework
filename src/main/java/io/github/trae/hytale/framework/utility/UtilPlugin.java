@@ -3,7 +3,9 @@ package io.github.trae.hytale.framework.utility;
 import com.hypixel.hytale.common.plugin.PluginIdentifier;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.plugin.PluginBase;
+import com.hypixel.hytale.server.core.receiver.IMessageReceiver;
 import io.github.trae.hytale.framework.HytalePlugin;
+import io.github.trae.hytale.framework.utility.enums.ChatColor;
 import io.github.trae.utilities.UtilJava;
 import io.github.trae.utilities.UtilString;
 import lombok.experimental.UtilityClass;
@@ -150,5 +152,63 @@ public class UtilPlugin {
         }
 
         return INTERNAL_PLUGINS.containsKey(name.toUpperCase(Locale.ROOT));
+    }
+
+    /**
+     * Searches for an external plugin by name with fuzzy matching.
+     *
+     * <p>First attempts an exact case-insensitive match on the plugin's
+     * {@link PluginIdentifier}. If no exact match is found, falls back to
+     * a case-insensitive contains check. If {@code inform} is {@code true}
+     * and no match is found or multiple matches are ambiguous, a formatted
+     * message is sent to the receiver.</p>
+     *
+     * @param messageReceiver the receiver to send search feedback to
+     * @param name            the plugin name or partial name to search for
+     * @param inform          whether to send feedback messages on failure
+     * @return an {@link Optional} containing the matched plugin, or empty
+     */
+    public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
+        return UtilSearch.search(
+                getPlugins(),
+                pluginBase -> pluginBase.getIdentifier().toString().equalsIgnoreCase(name),
+                pluginBase -> pluginBase.getIdentifier().toString().toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)),
+                null,
+                string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
+                pluginBase -> pluginBase.getIdentifier().toString(),
+                "External Plugin Search",
+                messageReceiver,
+                name,
+                inform
+        );
+    }
+
+    /**
+     * Searches for an internal {@link HytalePlugin} by name with fuzzy matching.
+     *
+     * <p>First attempts an exact case-insensitive match on the plugin's
+     * display name. If no exact match is found, falls back to a
+     * case-insensitive contains check. If {@code inform} is {@code true}
+     * and no match is found or multiple matches are ambiguous, a formatted
+     * message is sent to the receiver.</p>
+     *
+     * @param messageReceiver the receiver to send search feedback to
+     * @param name            the plugin name or partial name to search for
+     * @param inform          whether to send feedback messages on failure
+     * @return an {@link Optional} containing the matched plugin, or empty
+     */
+    public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
+        return UtilSearch.search(
+                getInternalPlugins(),
+                hytalePlugin -> hytalePlugin.getPluginName().equalsIgnoreCase(name),
+                hytalePlugin -> hytalePlugin.getPluginName().toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)),
+                null,
+                string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
+                HytalePlugin::getPluginName,
+                "Internal Plugin Search",
+                messageReceiver,
+                name,
+                inform
+        );
     }
 }
