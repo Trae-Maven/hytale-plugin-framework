@@ -49,6 +49,15 @@ public class SidebarCreateEvent extends CustomCancellableEvent implements ISideb
     private final PlayerRef playerRef;
 
     /**
+     * An identifier for the sidebar source.
+     *
+     * <p>Allows plugin listeners to tag the sidebar with an identifier
+     * so that other listeners or systems can determine which plugin
+     * or module created it. Defaults to {@code "DEFAULT"}.</p>
+     */
+    private String id = "DEFAULT";
+
+    /**
      * The sidebar title. Set by the plugin listener.
      */
     private Message title;

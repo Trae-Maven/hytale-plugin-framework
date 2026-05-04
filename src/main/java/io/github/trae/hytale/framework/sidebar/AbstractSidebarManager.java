@@ -143,7 +143,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
             return;
         }
 
-        this.update(event.getPlayerRef(), new Sidebar(event.getTitle(), event.getLines()));
+        this.update(event.getPlayerRef(), new Sidebar(event.getId(), event.getTitle(), event.getLines()));
     }
 
     /**
@@ -167,7 +167,8 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
      * <p>Creates an anonymous {@link CustomUIHud} that loads the {@code sidebar.ui}
      * layout, sets the title via {@code #sidebarTitle.TextSpans}, and iterates all
      * line rows — making active rows visible with their text set, and keeping
-     * inactive rows hidden.</p>
+     * inactive rows hidden. The sidebar state is stored in the map only after
+     * the HUD is successfully sent on the world thread.</p>
      *
      * @param playerRef the player to send the sidebar to
      * @param sidebar   the sidebar content

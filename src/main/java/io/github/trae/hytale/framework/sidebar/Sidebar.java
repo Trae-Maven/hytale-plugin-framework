@@ -27,6 +27,14 @@ import java.util.List;
 public class Sidebar {
 
     /**
+     * An optional identifier indicating which plugin or module created this sidebar.
+     *
+     * <p>Used to distinguish between sidebars from different sources when
+     * multiple plugins may contribute sidebar content.</p>
+     */
+    private final String id;
+
+    /**
      * The title displayed at the top of the sidebar.
      */
     private final Message title;
