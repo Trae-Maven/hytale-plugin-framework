@@ -11,6 +11,8 @@ public interface IAbstractSidebarManager {
 
     void remove(final PlayerRef playerRef);
 
+    boolean hasSidebar(final PlayerRef playerRef);
+
     void onSidebarCreateEvent(final SidebarCreateEvent event);
 
     void onSidebarUpdateEvent(final SidebarUpdateEvent event);

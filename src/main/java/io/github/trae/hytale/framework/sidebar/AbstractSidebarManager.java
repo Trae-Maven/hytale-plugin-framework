@@ -11,9 +11,10 @@ import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.sidebar.events.SidebarCreateEvent;
 import io.github.trae.hytale.framework.sidebar.events.SidebarUpdateEvent;
 import io.github.trae.hytale.framework.sidebar.interfaces.IAbstractSidebarManager;
-import io.github.trae.hytale.framework.sidebar.settings.SidebarSettings;
 import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.hytale.framework.utility.UtilPlayer;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -26,9 +27,14 @@ import java.util.function.Consumer;
  *
  * <p>This manager stores the most recently rendered {@link Sidebar} for each player
  * and uses it to diff against incoming updates. When a player receives their first
- * sidebar, the full inline UI markup is built and sent. On subsequent updates, only
- * changed title and line values are sent to the client, minimising bandwidth and
- * preventing visual flicker.</p>
+ * sidebar, the full {@code sidebar.ui} layout is loaded and all values are set. On
+ * subsequent updates, only changed title and line values are sent to the client,
+ * minimising bandwidth and preventing visual flicker.</p>
+ *
+ * <p>Each line in the {@code sidebar.ui} layout is wrapped in a row group
+ * ({@code #lineNRow}) with {@code Visible: false} by default. Active lines have
+ * their row group made visible and text set via {@code .TextSpans}. Inactive lines
+ * remain hidden, allowing the sidebar to auto-size to its content.</p>
  *
  * <p>Event handling is built directly into the manager via
  * {@link #onSidebarCreateEvent(SidebarCreateEvent)} and
@@ -46,6 +52,16 @@ import java.util.function.Consumer;
 public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Manager<Plugin>, IAbstractSidebarManager {
 
     /**
+     * The maximum number of line rows available in the {@code sidebar.ui} layout.
+     *
+     * <p>Corresponds to the number of {@code #lineNRow} groups defined in the
+     * {@code .ui} file. Defaults to {@code 16}.</p>
+     */
+    @Getter
+    @Setter
+    public static int maxLines = 16;
+
+    /**
      * Per-player sidebar state, keyed by player UUID.
      */
     private final ConcurrentHashMap<UUID, Sidebar> sidebarMap = new ConcurrentHashMap<>();
@@ -53,10 +69,10 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
     /**
      * Updates or creates the sidebar for the given player.
      *
-     * <p>If no previous sidebar exists for the player, a new {@link CustomUIHud}
-     * is built with the full inline markup and sent. If a previous sidebar exists,
-     * only the title and lines that differ from the previous state are sent as
-     * incremental updates.</p>
+     * <p>If no previous sidebar exists for the player, or if the line count
+     * has changed, a new {@link CustomUIHud} is built with the full
+     * {@code sidebar.ui} layout. Otherwise, only the title and lines that
+     * differ from the previous state are sent as incremental updates.</p>
      *
      * @param playerRef the player to update the sidebar for
      * @param sidebar   the new sidebar content
@@ -71,7 +87,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
 
         this.sidebarMap.put(playerRef.getUuid(), sidebar);
 
-        if (previousSidebar == null) {
+        if (previousSidebar == null || previousSidebar.getLines().size() != sidebar.getLines().size()) {
             this.createSidebar(playerRef, sidebar);
         } else {
             this.updateSidebar(playerRef, previousSidebar, sidebar);
@@ -81,8 +97,9 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
     /**
      * Removes the sidebar for the given player.
      *
-     * <p>Clears the stored sidebar state and sends an empty update to the
-     * player's active HUD, clearing all visible content.</p>
+     * <p>Clears the stored sidebar state. The HUD is not explicitly removed
+     * from the client — it will be replaced on the next sidebar creation or
+     * cleared on disconnect.</p>
      *
      * @param playerRef the player to remove the sidebar from
      */
@@ -93,13 +110,17 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         }
 
         this.sidebarMap.remove(playerRef.getUuid());
+    }
 
-        this.execute(playerRef, player -> {
-            final CustomUIHud customHud = player.getHudManager().getCustomHud();
-            if (customHud != null) {
-                customHud.update(true, new UICommandBuilder());
-            }
-        });
+    /**
+     * Returns whether the given player has an active sidebar.
+     *
+     * @param playerRef the player to check
+     * @return {@code true} if the player has a stored sidebar
+     */
+    @Override
+    public boolean hasSidebar(final PlayerRef playerRef) {
+        return this.sidebarMap.containsKey(playerRef.getUuid());
     }
 
     /**
@@ -144,38 +165,46 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
     /**
      * Builds and sends a full sidebar HUD to the player.
      *
-     * <p>Creates an anonymous {@link CustomUIHud} that appends the inline markup
-     * from {@link SidebarSettings#getMarkup()} and sets all title and line values.
-     * Used when the player has no existing sidebar.</p>
+     * <p>Creates an anonymous {@link CustomUIHud} that loads the {@code sidebar.ui}
+     * layout, sets the title via {@code #sidebarTitle.TextSpans}, and iterates all
+     * line rows — making active rows visible with their text set, and keeping
+     * inactive rows hidden.</p>
      *
      * @param playerRef the player to send the sidebar to
      * @param sidebar   the sidebar content
      */
     private void createSidebar(final PlayerRef playerRef, final Sidebar sidebar) {
-        final CustomUIHud hud = new CustomUIHud(playerRef) {
+        final CustomUIHud customHud = new CustomUIHud(playerRef) {
             @Override
             protected void build(@Nonnull final UICommandBuilder uiCommandBuilder) {
-                uiCommandBuilder.appendInline("", SidebarSettings.getMarkup().get());
+                uiCommandBuilder.append("sidebar.ui");
 
-                uiCommandBuilder.set("#sidebar-title", sidebar.getTitle());
+                uiCommandBuilder.set("#sidebarTitle.TextSpans", sidebar.getTitle());
 
                 final List<Message> lines = sidebar.getLines();
 
-                for (int index = 0; index < SidebarSettings.getMaxLines(); index++) {
-                    uiCommandBuilder.set("#line-%s".formatted(index), index < lines.size() ? lines.get(index) : Message.empty());
+                for (int index = 0; index < maxLines; index++) {
+                    if (index < lines.size()) {
+                        uiCommandBuilder.set("#line%sRow.Visible".formatted(index), true);
+                        uiCommandBuilder.set("#line%s.TextSpans".formatted(index), lines.get(index));
+                    } else {
+                        uiCommandBuilder.set("#line%sRow.Visible".formatted(index), false);
+                    }
                 }
             }
         };
 
-        this.execute(playerRef, player -> player.getHudManager().setCustomHud(playerRef, hud));
+        this.execute(playerRef, player -> player.getHudManager().setCustomHud(playerRef, customHud));
     }
 
     /**
      * Diffs the new sidebar against the previous one and sends only changed values.
      *
-     * <p>Compares the title and each line index up to {@link SidebarSettings#getMaxLines()}.
-     * Lines beyond the current list size are treated as {@link Message#empty()}.
-     * If no values have changed, no update is sent.</p>
+     * <p>Compares the title and each line up to the maximum of the previous and
+     * current line counts. Row visibility is toggled when lines are added or
+     * removed. Only lines whose text content has changed produce
+     * {@code .TextSpans} update commands. If nothing has changed, no update
+     * is sent.</p>
      *
      * @param playerRef       the player to update the sidebar for
      * @param previousSidebar the previously rendered sidebar
@@ -187,20 +216,32 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         boolean dirty = false;
 
         if (!(sidebar.getTitle().equals(previousSidebar.getTitle()))) {
-            uiCommandBuilder.set("#sidebar-title", sidebar.getTitle());
+            uiCommandBuilder.set("#sidebarTitle.TextSpans", sidebar.getTitle());
             dirty = true;
         }
 
         final List<Message> previousLines = previousSidebar.getLines();
         final List<Message> currentLines = sidebar.getLines();
 
-        for (int index = 0; index < SidebarSettings.getMaxLines(); index++) {
-            final Message previous = index < previousLines.size() ? previousLines.get(index) : Message.empty();
-            final Message current = index < currentLines.size() ? currentLines.get(index) : Message.empty();
+        final int max = Math.max(previousLines.size(), currentLines.size());
 
-            if (!(current.equals(previous))) {
-                uiCommandBuilder.set("#line-%s".formatted(index), current);
+        for (int index = 0; index < max; index++) {
+            final boolean wasActive = index < previousLines.size();
+            final boolean isActive = index < currentLines.size();
+
+            if (wasActive != isActive) {
+                uiCommandBuilder.set("#line%sRow.Visible".formatted(index), isActive);
                 dirty = true;
+            }
+
+            if (isActive) {
+                final Message current = currentLines.get(index);
+                final Message previous = wasActive ? previousLines.get(index) : Message.empty();
+
+                if (!(current.equals(previous))) {
+                    uiCommandBuilder.set("#line%s.TextSpans".formatted(index), current);
+                    dirty = true;
+                }
             }
         }
 
