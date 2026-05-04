@@ -3,7 +3,6 @@ package io.github.trae.hytale.framework.sidebar.events;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import io.github.trae.hytale.framework.event.types.CustomCancellableEvent;
-import io.github.trae.hytale.framework.sidebar.constants.SidebarConstants;
 import io.github.trae.hytale.framework.sidebar.events.interfaces.ISidebarCreateEvent;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +34,6 @@ import java.util.List;
  *     }
  *
  *     if (event.isCreated()) {
- *         return;
- *     }
- *
- *     if (!event.isIdentifier("FACTIONS")) {
  *         return;
  *     }
  *
@@ -80,11 +75,6 @@ public class SidebarCreateEvent extends CustomCancellableEvent implements ISideb
      */
     private List<Message> lines;
 
-    @Override
-    public boolean isIdentifier(final String identifier) {
-        return this.getIdentifier().equals(SidebarConstants.DEFAULT_IDENTIFIER) || this.getIdentifier().equals(identifier);
-    }
-
     /**
      * Returns whether the sidebar content has been fully populated by a listener.
      *
@@ -95,6 +85,6 @@ public class SidebarCreateEvent extends CustomCancellableEvent implements ISideb
      */
     @Override
     public boolean isCreated() {
-        return this.getTitle() != null || (this.getLines() != null && !(this.getLines().isEmpty()));
+        return this.getTitle() != null && this.getLines() != null && !(this.getLines().isEmpty());
     }
 }

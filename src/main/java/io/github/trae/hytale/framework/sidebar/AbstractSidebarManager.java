@@ -151,6 +151,11 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
             return;
         }
 
+        final Sidebar existingSidebar = this.sidebarMap.get(event.getPlayerRef().getUuid());
+        if (existingSidebar != null && !(existingSidebar.getIdentifier().equals(event.getIdentifier()))) {
+            return;
+        }
+
         this.update(event.getPlayerRef(), new Sidebar(event.getIdentifier(), event.getTitle(), event.getLines()));
     }
 
