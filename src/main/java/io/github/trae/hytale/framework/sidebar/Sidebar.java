@@ -35,6 +35,15 @@ public class Sidebar {
     private final String identifier;
 
     /**
+     * The priority level of this sidebar source.
+     *
+     * <p>Higher values take precedence. A sidebar with a lower priority
+     * cannot overwrite one with a higher priority from a different source.
+     * Same-identifier updates always go through regardless of priority.</p>
+     */
+    private final int priority;
+
+    /**
      * The title displayed at the top of the sidebar.
      */
     private final Message title;

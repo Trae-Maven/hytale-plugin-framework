@@ -2,6 +2,7 @@ package io.github.trae.hytale.framework.sidebar.events;
 
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import io.github.trae.hytale.framework.event.types.CustomEvent;
+import io.github.trae.hytale.framework.sidebar.constants.SidebarConstants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -40,6 +41,6 @@ public class SidebarUpdateEvent extends CustomEvent {
     private final PlayerRef playerRef;
 
     public SidebarUpdateEvent(final PlayerRef playerRef) {
-        this("DEFAULT", playerRef);
+        this(SidebarConstants.DEFAULT_IDENTIFIER, playerRef);
     }
 }

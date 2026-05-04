@@ -152,11 +152,11 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         }
 
         final Sidebar existingSidebar = this.sidebarMap.get(event.getPlayerRef().getUuid());
-        if (existingSidebar != null && !(existingSidebar.getIdentifier().equals(event.getIdentifier()))) {
+        if (existingSidebar != null && !(existingSidebar.getIdentifier().equals(event.getIdentifier())) && existingSidebar.getPriority() > event.getPriority()) {
             return;
         }
 
-        this.update(event.getPlayerRef(), new Sidebar(event.getIdentifier(), event.getTitle(), event.getLines()));
+        this.update(event.getPlayerRef(), new Sidebar(event.getIdentifier(), event.getPriority(), event.getTitle(), event.getLines()));
     }
 
     /**
@@ -171,7 +171,11 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
      */
     @Override
     public void onSidebarUpdateEvent(final SidebarUpdateEvent event) {
-        UtilEvent.dispatch(new SidebarCreateEvent(event.getIdentifier(), event.getPlayerRef()));
+        final SidebarCreateEvent sidebarCreateEvent = new SidebarCreateEvent(event.getPlayerRef());
+
+        sidebarCreateEvent.setIdentifier(event.getIdentifier());
+
+        UtilEvent.dispatch(sidebarCreateEvent);
     }
 
     /**
