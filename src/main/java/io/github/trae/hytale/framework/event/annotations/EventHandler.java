@@ -24,7 +24,7 @@ public @interface EventHandler {
      *
      * @return the priority value
      */
-    int priority() default EventPriority.NORMAL;
+    int priority();
 
     /**
      * Whether this handler should skip cancelled events.
