@@ -109,7 +109,9 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
             return;
         }
 
-        this.sidebarMap.remove(playerRef.getUuid());
+        if (this.sidebarMap.remove(playerRef.getUuid()) != null) {
+            this.execute(playerRef, player -> player.getHudManager().setCustomHud(playerRef, null));
+        }
     }
 
     /**
