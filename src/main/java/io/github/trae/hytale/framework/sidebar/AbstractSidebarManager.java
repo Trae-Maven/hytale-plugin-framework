@@ -296,6 +296,10 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         final World world = playerReference.getStore().getExternalData().getWorld();
 
         world.execute(() -> {
+            if (!(playerReference.isValid())) {
+                return;
+            }
+
             final Player player = playerReference.getStore().getComponent(playerReference, Player.getComponentType());
             if (player != null) {
                 consumer.accept(player);
