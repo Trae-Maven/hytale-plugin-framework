@@ -5,7 +5,7 @@ import com.hypixel.hytale.event.EventRegistry;
 import com.hypixel.hytale.event.IAsyncEvent;
 import com.hypixel.hytale.event.IBaseEvent;
 import io.github.trae.hytale.framework.HytalePlugin;
-import io.github.trae.hytale.framework.event.Listener;
+import io.github.trae.hytale.framework.event.EventListener;
 import io.github.trae.hytale.framework.event.annotations.EventHandler;
 import io.github.trae.hytale.framework.helper.abstracts.AbstractHelper;
 import io.github.trae.utilities.UtilMethod;
@@ -19,27 +19,27 @@ import java.util.Optional;
 /**
  * Helper responsible for managing event listener registrations within a {@link HytalePlugin}.
  *
- * <p>Scans {@link Listener} instances for methods annotated with {@link EventHandler},
+ * <p>Scans {@link EventListener} instances for methods annotated with {@link EventHandler},
  * resolves the event class from the method's single parameter, and registers them
  * with the plugin's {@link EventRegistry}. Supports both synchronous and asynchronous
  * event handlers.</p>
  *
  * <p>Each listener is tracked alongside its list of {@link EventRegistration} handles,
- * enabling clean bulk unregistration via {@link #unregister(Listener)}.</p>
+ * enabling clean bulk unregistration via {@link #unregister(EventListener)}.</p>
  */
-public class ListenerHelper extends AbstractHelper<Listener> {
+public class EventHelper extends AbstractHelper<EventListener> {
 
     /**
      * Map of listeners to their associated event registration handles.
      */
-    private final LinkedHashMap<Listener, List<EventRegistration<?, ?>>> REGISTRATIONS = new LinkedHashMap<>();
+    private final LinkedHashMap<EventListener, List<EventRegistration<?, ?>>> REGISTRATIONS = new LinkedHashMap<>();
 
     /**
-     * Creates a new {@link ListenerHelper} bound to the given plugin.
+     * Creates a new {@link EventHelper} bound to the given plugin.
      *
      * @param plugin the owning plugin instance
      */
-    public ListenerHelper(final HytalePlugin plugin) {
+    public EventHelper(final HytalePlugin plugin) {
         super(plugin);
     }
 
@@ -54,7 +54,7 @@ public class ListenerHelper extends AbstractHelper<Listener> {
      * @param listener the listener instance to register
      */
     @Override
-    public void register(final Listener listener) {
+    public void register(final EventListener listener) {
         for (final Method method : listener.getClass().getMethods()) {
             if (!(method.isAnnotationPresent(EventHandler.class))) {
                 continue;
@@ -78,7 +78,7 @@ public class ListenerHelper extends AbstractHelper<Listener> {
      * @param listener the listener instance to unregister
      */
     @Override
-    public void unregister(final Listener listener) {
+    public void unregister(final EventListener listener) {
         final List<EventRegistration<?, ?>> eventRegistrationList = this.REGISTRATIONS.remove(listener);
         if (eventRegistrationList == null) {
             return;
@@ -126,7 +126,7 @@ public class ListenerHelper extends AbstractHelper<Listener> {
      * @param eventClass the resolved event class
      * @return the resulting {@link EventRegistration}
      */
-    private EventRegistration<?, ?> getEventRegistration(final Listener listener, final Method method, final Class<IBaseEvent<?>> eventClass) {
+    private EventRegistration<?, ?> getEventRegistration(final EventListener listener, final Method method, final Class<IBaseEvent<?>> eventClass) {
         final EventRegistry eventRegistry = this.getPlugin().getEventRegistry();
 
         final EventHandler annotation = method.getAnnotation(EventHandler.class);

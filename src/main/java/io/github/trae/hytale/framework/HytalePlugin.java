@@ -1,6 +1,5 @@
 package io.github.trae.hytale.framework;
 
-import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
 import com.hypixel.hytale.server.core.io.adapter.PacketWatcher;
@@ -12,11 +11,11 @@ import io.github.trae.di.InjectorApi;
 import io.github.trae.hf.Module;
 import io.github.trae.hf.Plugin;
 import io.github.trae.hf.SubModule;
-import io.github.trae.hytale.framework.event.Listener;
+import io.github.trae.hytale.framework.event.EventListener;
 import io.github.trae.hytale.framework.helper.*;
 import io.github.trae.hytale.framework.plugin.events.PluginInitializeEvent;
 import io.github.trae.hytale.framework.plugin.events.PluginShutdownEvent;
-import io.github.trae.hytale.framework.system.interfaces.CustomSystem;
+import io.github.trae.hytale.framework.system.SystemListener;
 import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.hytale.framework.utility.UtilPlugin;
 import io.github.trae.hytale.framework.utility.UtilTask;
@@ -38,12 +37,12 @@ import javax.annotation.Nonnull;
  * through the {@link #onComponentInitialize(Object)} and
  * {@link #onComponentShutdown(Object)} lifecycle callbacks:</p>
  * <ul>
- *   <li>{@link Listener} — registered with the event bus via {@link ListenerHelper}</li>
+ *   <li>{@link EventListener} — registered with the event bus via {@link EventHelper}</li>
+ *   <li>{@link SystemListener} — registered with the ECS store registry via {@link SystemHelper}</li>
  *   <li>{@link PacketWatcher} — registered with the packet pipeline via {@link PacketWatcherHelper}</li>
  *   <li>{@link PlayerPacketWatcher} — registered with the packet pipeline via {@link PlayerPacketWatcherHelper}</li>
  *   <li>{@link PacketFilter} — registered with the packet pipeline via {@link PacketFilterHelper}</li>
  *   <li>{@link PlayerPacketFilter} — registered with the packet pipeline via {@link PlayerPacketFilterHelper}</li>
- *   <li>{@link EntityEventSystem} — registered with the ECS registry via {@link SystemHelper}</li>
  *   <li>{@link AbstractCommand} as {@link Module} — registered with the command system via {@link CommandHelper}</li>
  *   <li>{@link AbstractCommand} as {@link SubModule} — attached to the parent command as a subcommand</li>
  * </ul>
@@ -52,12 +51,12 @@ import javax.annotation.Nonnull;
  * initialization and bulk-registered when {@link #initializePlugin()} calls
  * {@link CommandHelper#process()}.</p>
  *
- * @see ListenerHelper
+ * @see EventHelper
+ * @see SystemHelper
  * @see PacketWatcherHelper
  * @see PlayerPacketWatcherHelper
  * @see PacketFilterHelper
  * @see PlayerPacketFilterHelper
- * @see SystemHelper
  * @see CommandHelper
  */
 @Getter
@@ -69,14 +68,14 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     private final CommandHelper commandHelper;
 
     /**
-     * Helper managing ECS event system registrations for this plugin.
+     * Helper managing ECS system registrations for this plugin.
      */
     private final SystemHelper systemHelper;
 
     /**
      * Helper managing event listener registrations for this plugin.
      */
-    private final ListenerHelper listenerHelper;
+    private final EventHelper eventHelper;
 
     /**
      * Helper managing packet watcher registrations for this plugin.
@@ -108,7 +107,7 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
         UtilLogger.setLogger(this.getLogger());
 
-        this.listenerHelper = new ListenerHelper(this);
+        this.eventHelper = new EventHelper(this);
         this.systemHelper = new SystemHelper(this);
         this.commandHelper = new CommandHelper(this);
         this.packetWatcherHelper = new PacketWatcherHelper(this);
@@ -159,12 +158,12 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      *
      * <p>Routes the component to the appropriate helper based on its type:</p>
      * <ul>
-     *   <li>{@link Listener} — registered with the event bus</li>
+     *   <li>{@link EventListener} — registered with the event bus</li>
+     *   <li>{@link SystemListener} — registered with the ECS store registry</li>
      *   <li>{@link PacketWatcher} — registered with the packet pipeline</li>
      *   <li>{@link PlayerPacketWatcher} — registered with the packet pipeline</li>
      *   <li>{@link PacketFilter} — registered with the packet pipeline</li>
      *   <li>{@link PlayerPacketFilter} — registered with the packet pipeline</li>
-     *   <li>{@link EntityEventSystem} — registered with the ECS store registry</li>
      *   <li>{@link AbstractCommand} + {@link Module} — queued as a root command</li>
      *   <li>{@link AbstractCommand} + {@link SubModule} — attached to the parent
      *       module's command as a subcommand</li>
@@ -174,8 +173,24 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      */
     @Override
     public void onComponentInitialize(final Object instance) {
-        if (instance instanceof final Listener listener) {
-            this.listenerHelper.register(listener);
+        if (instance instanceof final EventListener listener) {
+            this.eventHelper.register(listener);
+        }
+
+        if (instance instanceof final SystemListener systemListener) {
+            this.systemHelper.register(systemListener);
+        }
+
+        // Root commands — queued for bulk registration during initializePlugin()
+        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
+            this.commandHelper.register(abstractCommand);
+        }
+
+        // Subcommands — attached directly to their parent command
+        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
+            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
+
+            abstractCommand.addSubCommand(abstractSubCommand);
         }
 
         if (instance instanceof final PacketWatcher packetWatcher) {
@@ -193,22 +208,6 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
         if (instance instanceof final PlayerPacketFilter playerPacketFilter) {
             this.playerPacketFilterHelper.register(playerPacketFilter);
         }
-
-        if (instance instanceof final CustomSystem system) {
-            this.systemHelper.register(system);
-        }
-
-        // Root commands — queued for bulk registration during initializePlugin()
-        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
-            this.commandHelper.register(abstractCommand);
-        }
-
-        // Subcommands — attached directly to their parent command
-        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
-            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
-
-            abstractCommand.addSubCommand(abstractSubCommand);
-        }
     }
 
     /**
@@ -216,12 +215,12 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      *
      * <p>Reverses the registrations performed in {@link #onComponentInitialize(Object)}:</p>
      * <ul>
-     *   <li>{@link Listener} — unregistered from the event bus</li>
+     *   <li>{@link EventListener} — unregistered from the event bus</li>
+     *   <li>{@link SystemListener} — unregistered from the ECS store registry</li>
      *   <li>{@link PacketWatcher} — unregistered from the packet pipeline</li>
      *   <li>{@link PlayerPacketWatcher} — unregistered from the packet pipeline</li>
      *   <li>{@link PacketFilter} — unregistered from the packet pipeline</li>
      *   <li>{@link PlayerPacketFilter} — unregistered from the packet pipeline</li>
-     *   <li>{@link EntityEventSystem} — unregistered from the ECS store registry</li>
      *   <li>{@link AbstractCommand} + {@link Module} — unregistered from the command system</li>
      *   <li>{@link AbstractCommand} + {@link SubModule} — removed from the parent command's
      *       subcommand map</li>
@@ -231,8 +230,24 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      */
     @Override
     public void onComponentShutdown(final Object instance) {
-        if (instance instanceof final Listener listener) {
-            this.listenerHelper.unregister(listener);
+        if (instance instanceof final EventListener listener) {
+            this.eventHelper.unregister(listener);
+        }
+
+        if (instance instanceof final SystemListener systemListener) {
+            this.systemHelper.unregister(systemListener);
+        }
+
+        // Root commands — unregistered from the command system
+        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
+            this.commandHelper.unregister(abstractCommand);
+        }
+
+        // Subcommands — removed from the parent command's subcommand map
+        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
+            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
+
+            abstractCommand.getSubCommands().remove(abstractSubCommand.getName());
         }
 
         if (instance instanceof final PacketWatcher packetWatcher) {
@@ -249,22 +264,6 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
         if (instance instanceof final PlayerPacketFilter playerPacketFilter) {
             this.playerPacketFilterHelper.unregister(playerPacketFilter);
-        }
-
-        if (instance instanceof final CustomSystem system) {
-            this.systemHelper.unregister(system);
-        }
-
-        // Root commands — unregistered from the command system
-        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
-            this.commandHelper.unregister(abstractCommand);
-        }
-
-        // Subcommands — removed from the parent command's subcommand map
-        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
-            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
-
-            abstractCommand.getSubCommands().remove(abstractSubCommand.getName());
         }
     }
 }

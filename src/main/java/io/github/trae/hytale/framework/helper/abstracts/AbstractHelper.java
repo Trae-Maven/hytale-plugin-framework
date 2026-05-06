@@ -1,6 +1,7 @@
 package io.github.trae.hytale.framework.helper.abstracts;
 
 import io.github.trae.hytale.framework.HytalePlugin;
+import io.github.trae.hytale.framework.helper.EventHelper;
 import io.github.trae.hytale.framework.helper.abstracts.interfaces.IAbstractHelper;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,10 +17,10 @@ import lombok.Getter;
  *
  * @param <Type> the type of component this helper manages
  * @see io.github.trae.hytale.framework.helper.CommandHelper
- * @see io.github.trae.hytale.framework.helper.ListenerHelper
+ * @see EventHelper
  * @see io.github.trae.hytale.framework.helper.PacketWatcherHelper
  * @see io.github.trae.hytale.framework.helper.PlayerPacketWatcherHelper
- * @see io.github.trae.hytale.framework.helper.SystemHelper
+ * @see OldSystemHelper
  */
 @AllArgsConstructor
 public abstract class AbstractHelper<Type> implements IAbstractHelper<Type> {
