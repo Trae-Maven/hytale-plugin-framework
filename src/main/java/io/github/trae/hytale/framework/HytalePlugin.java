@@ -1,5 +1,6 @@
 package io.github.trae.hytale.framework;
 
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
 import com.hypixel.hytale.server.core.io.adapter.PacketWatcher;
@@ -107,6 +108,14 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
         UtilLogger.setLogger(this.getLogger());
 
+        InjectorApi.setConfigurationDirectory(this.getClass(), this.getDataDirectory());
+
+        if (InjectorApi.getScheduledExecutorService() == null) {
+            InjectorApi.setScheduledExecutorService(HytaleServer.SCHEDULED_EXECUTOR);
+            InjectorApi.setSynchronousExecutor(UtilTask::executeSynchronous);
+            InjectorApi.setAsynchronousExecutor(UtilTask::executeAsynchronous);
+        }
+
         this.eventHelper = new EventHelper(this);
         this.systemHelper = new SystemHelper(this);
         this.commandHelper = new CommandHelper(this);
@@ -130,11 +139,6 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      */
     @Override
     public void initializePlugin() {
-        InjectorApi.setConfigurationDirectory(this.getClass(), this.getDataDirectory());
-
-        InjectorApi.setSynchronousExecutor(UtilTask::executeSynchronous);
-        InjectorApi.setAsynchronousExecutor(UtilTask::executeAsynchronous);
-
         // Run hierarchy initialization — discovers and initializes all components
         Plugin.super.initializePlugin();
 
