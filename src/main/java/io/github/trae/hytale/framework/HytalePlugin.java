@@ -112,9 +112,10 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
         if (InjectorApi.getScheduledExecutorService() == null) {
             InjectorApi.setScheduledExecutorService(HytaleServer.SCHEDULED_EXECUTOR);
-            InjectorApi.setSynchronousExecutor(UtilTask::executeSynchronous);
-            InjectorApi.setAsynchronousExecutor(UtilTask::executeAsynchronous);
         }
+
+        InjectorApi.setSynchronousExecutor(this.getClass(), UtilTask::executeSynchronous);
+        InjectorApi.setAsynchronousExecutor(this.getClass(), UtilTask::executeAsynchronous);
 
         this.eventHelper = new EventHelper(this);
         this.systemHelper = new SystemHelper(this);
