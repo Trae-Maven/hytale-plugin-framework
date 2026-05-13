@@ -77,7 +77,7 @@ public class BlockLocation implements IBlockLocation {
      * @return the integer position vector
      */
     @Override
-    public Vector3i toVector() {
+    public Vector3i getPosition() {
         return new Vector3i(this.getX(), this.getY(), this.getZ());
     }
 

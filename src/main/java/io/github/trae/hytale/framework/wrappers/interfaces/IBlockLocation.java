@@ -8,5 +8,5 @@ public interface IBlockLocation extends Location {
 
     BlockType getBlockType();
 
-    Vector3i toVector();
+    Vector3i getPosition();
 }

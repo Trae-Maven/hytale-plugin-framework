@@ -96,14 +96,31 @@ public class EntityLocation implements IEntityLocation {
     }
 
     /**
-     * Converts this entity location to a {@link Vector3d} position vector
-     * with yaw and pitch assigned.
+     * Converts this entity location to a {@link Vector3d} positional vector.
      *
-     * @return the double position vector with rotation
+     * <p>Only spatial coordinates (x, y, z) are included. Rotation
+     * values such as yaw and pitch are intentionally excluded.</p>
+     *
+     * @return the double-precision position vector
      */
     @Override
-    public Vector3d toVector() {
-        return new Vector3d(this.getX(), this.getY(), this.getZ()).assign(this.getYaw(), this.getPitch());
+    public Vector3d getPosition() {
+        return new Vector3d(this.getX(), this.getY(), this.getZ());
+    }
+
+    /**
+     * Converts this entity location to a {@link Vector3f} rotation vector.
+     *
+     * <p>Rotation follows the Hytale SDK convention where:
+     * x = pitch, y = yaw, z = roll.</p>
+     *
+     * <p>Roll is always set to 0.</p>
+     *
+     * @return the float rotation vector
+     */
+    @Override
+    public Vector3f getRotation() {
+        return new Vector3f(this.getYaw(), this.getPitch());
     }
 
     /**

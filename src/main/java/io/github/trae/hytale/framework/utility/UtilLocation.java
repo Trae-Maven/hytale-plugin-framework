@@ -83,7 +83,7 @@ public class UtilLocation {
             return false;
         }
 
-        return fromBlockLocation.toVector().distanceSquaredTo(toBlockLocation.toVector()) <= (distance * distance);
+        return fromBlockLocation.getPosition().distanceSquaredTo(toBlockLocation.getPosition()) <= (distance * distance);
     }
 
     /**
@@ -110,7 +110,7 @@ public class UtilLocation {
             return false;
         }
 
-        return fromEntityLocation.toVector().distanceSquaredTo(toEntityLocation.toVector()) <= (distance * distance);
+        return fromEntityLocation.getPosition().distanceSquaredTo(toEntityLocation.getPosition()) <= (distance * distance);
     }
 
     /**
