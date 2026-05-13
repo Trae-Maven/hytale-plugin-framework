@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hytale.framework.wrappers.BlockLocation;
 import io.github.trae.hytale.framework.wrappers.EntityLocation;
+import io.github.trae.hytale.framework.wrappers.Location;
 import lombok.experimental.UtilityClass;
 
 import java.util.UUID;
@@ -110,5 +111,46 @@ public class UtilLocation {
         }
 
         return fromEntityLocation.toVector().distanceSquaredTo(toEntityLocation.toVector()) <= (distance * distance);
+    }
+
+    /**
+     * Checks whether two generic locations are within a given distance
+     * of each other by normalizing supported location implementations
+     * to {@link EntityLocation} precision.
+     *
+     * <p>Supports comparisons between {@link BlockLocation},
+     * {@link EntityLocation}, or mixed location types.</p>
+     *
+     * <p>Returns {@code false} if either location is {@code null},
+     * belongs to different worlds, or uses an unsupported
+     * {@link Location} implementation.</p>
+     *
+     * @param fromLocation the source location
+     * @param toLocation   the target location
+     * @param distance     the maximum allowed distance
+     * @return {@code true} if both locations are within the specified range
+     */
+    public static boolean isWithinDistance(final Location fromLocation, final Location toLocation, final double distance) {
+        if (fromLocation == null || toLocation == null) {
+            return false;
+        }
+
+        final EntityLocation fromEntityLocation = switch (fromLocation) {
+            case final EntityLocation entityLocation -> entityLocation;
+            case final BlockLocation blockLocation -> new EntityLocation(blockLocation.getWorld(), blockLocation.getX(), blockLocation.getY(), blockLocation.getZ());
+            default -> null;
+        };
+
+        final EntityLocation toEntityLocation = switch (toLocation) {
+            case final EntityLocation entityLocation -> entityLocation;
+            case final BlockLocation blockLocation -> new EntityLocation(blockLocation.getWorld(), blockLocation.getX(), blockLocation.getY(), blockLocation.getZ());
+            default -> null;
+        };
+
+        if (fromEntityLocation == null || toEntityLocation == null) {
+            return false;
+        }
+
+        return isWithinDistance(fromEntityLocation, toEntityLocation, distance);
     }
 }
