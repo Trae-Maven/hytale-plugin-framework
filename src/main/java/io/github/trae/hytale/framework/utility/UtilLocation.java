@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import io.github.trae.hytale.framework.wrappers.BlockLocation;
 import io.github.trae.hytale.framework.wrappers.EntityLocation;
 import lombok.experimental.UtilityClass;
 
@@ -52,6 +53,62 @@ public class UtilLocation {
             return null;
         }
 
-        return EntityLocation.of(player.getWorld(), transformComponent.getPosition(), transformComponent.getRotation());
+        final World world = player.getWorld();
+        if (world == null) {
+            return null;
+        }
+
+        return EntityLocation.of(world, transformComponent.getPosition(), transformComponent.getRotation());
+    }
+
+    /**
+     * Checks whether two block locations are within a given block distance
+     * of each other using squared-distance comparison for performance.
+     *
+     * <p>Returns {@code false} if either location is {@code null} or if the
+     * locations belong to different worlds.</p>
+     *
+     * @param fromBlockLocation the source block location
+     * @param toBlockLocation   the target block location
+     * @param distance          the maximum allowed distance
+     * @return {@code true} if both locations are within the specified range
+     */
+    public static boolean isWithinDistance(final BlockLocation fromBlockLocation, final BlockLocation toBlockLocation, final int distance) {
+        if (fromBlockLocation == null || toBlockLocation == null) {
+            return false;
+        }
+
+        if (!(fromBlockLocation.getWorldName().equals(toBlockLocation.getWorldName()))) {
+            return false;
+        }
+
+        return fromBlockLocation.toVector().distanceSquaredTo(toBlockLocation.toVector()) <= (distance * distance);
+    }
+
+    /**
+     * Checks whether two entity locations are within a given distance
+     * of each other using squared-distance comparison for performance.
+     *
+     * <p>Useful for movement tolerance checks, teleport validation,
+     * and proximity-based entity operations.</p>
+     *
+     * <p>Returns {@code false} if either location is {@code null} or if the
+     * locations belong to different worlds.</p>
+     *
+     * @param fromEntityLocation the source entity location
+     * @param toEntityLocation   the target entity location
+     * @param distance           the maximum allowed distance
+     * @return {@code true} if both locations are within the specified range
+     */
+    public static boolean isWithinDistance(final EntityLocation fromEntityLocation, final EntityLocation toEntityLocation, final double distance) {
+        if (fromEntityLocation == null || toEntityLocation == null) {
+            return false;
+        }
+
+        if (!(fromEntityLocation.getWorldName().equals(toEntityLocation.getWorldName()))) {
+            return false;
+        }
+
+        return fromEntityLocation.toVector().distanceSquaredTo(toEntityLocation.toVector()) <= (distance * distance);
     }
 }
