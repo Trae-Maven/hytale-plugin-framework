@@ -11,8 +11,10 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hytale.framework.wrappers.BlockLocation;
 import io.github.trae.hytale.framework.wrappers.EntityLocation;
 import io.github.trae.hytale.framework.wrappers.Location;
+import io.github.trae.utilities.UtilNumber;
 import lombok.experimental.UtilityClass;
 
+import java.awt.*;
 import java.util.UUID;
 
 @UtilityClass
@@ -152,5 +154,38 @@ public class UtilLocation {
         }
 
         return isWithinDistance(fromEntityLocation, toEntityLocation, distance);
+    }
+
+    /**
+     * Formats a location's coordinates as a colored, comma-separated string
+     * in the form {@code x, y, z}.
+     *
+     * <p>For {@link BlockLocation}, coordinates are formatted as integers.
+     * For {@link EntityLocation}, coordinates are formatted to three decimal
+     * places.</p>
+     *
+     * @param location the location to format
+     * @param color    the color to apply to each coordinate value
+     * @return the formatted coordinate string, or {@code null} if the
+     * location type is unsupported
+     */
+    public static String formatLocation(final Location location, final Color color) {
+        if (location instanceof final BlockLocation blockLocation) {
+            final String x = String.valueOf(blockLocation.getX());
+            final String y = String.valueOf(blockLocation.getY());
+            final String z = String.valueOf(blockLocation.getZ());
+
+            return "%s, %s, %s".formatted(UtilColor.serialize(color, x), UtilColor.serialize(color, y), UtilColor.serialize(color, z));
+        }
+
+        if (location instanceof final EntityLocation entityLocation) {
+            final String x = UtilNumber.format("#.###", entityLocation.getX());
+            final String y = UtilNumber.format("#.###", entityLocation.getY());
+            final String z = UtilNumber.format("#.###", entityLocation.getZ());
+
+            return "%s, %s, %s".formatted(UtilColor.serialize(color, x), UtilColor.serialize(color, y), UtilColor.serialize(color, z));
+        }
+
+        return null;
     }
 }

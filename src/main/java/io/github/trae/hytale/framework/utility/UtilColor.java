@@ -23,6 +23,10 @@ public class UtilColor {
      * @return the text wrapped in opening and closing color tags
      */
     public static String serialize(final Color color, final String string) {
+        if (color == null) {
+            return string;
+        }
+
         final String colorTag;
 
         // Attempt to resolve a named ChatColor from the RGB value

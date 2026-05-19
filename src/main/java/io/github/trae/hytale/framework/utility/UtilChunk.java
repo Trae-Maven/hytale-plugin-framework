@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hytale.framework.wrappers.Chunk;
 import lombok.experimental.UtilityClass;
 
+import java.awt.*;
 import java.util.UUID;
 
 @UtilityClass
@@ -49,6 +50,26 @@ public class UtilChunk {
             return null;
         }
 
-        return Chunk.of(player.getWorld(), transformComponent.getPosition());
+        final World world = player.getWorld();
+        if (world == null) {
+            return null;
+        }
+
+        return Chunk.of(world, transformComponent.getPosition());
+    }
+
+    /**
+     * Formats a chunk's coordinates as a colored, comma-separated string
+     * in the form {@code x, z}.
+     *
+     * @param chunk the chunk to format
+     * @param color the color to apply to each coordinate value
+     * @return the formatted chunk coordinate string
+     */
+    public static String formatChunk(final Chunk chunk, final Color color) {
+        final String x = String.valueOf(chunk.getX());
+        final String z = String.valueOf(chunk.getZ());
+
+        return "%s, %s".formatted(UtilColor.serialize(color, x), UtilColor.serialize(color, z));
     }
 }
