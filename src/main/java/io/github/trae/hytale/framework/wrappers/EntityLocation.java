@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import io.github.trae.hytale.framework.wrappers.interfaces.IEntityLocation;
 import io.github.trae.utilities.UtilJava;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.joml.Vector3d;
@@ -30,6 +31,8 @@ public class EntityLocation implements IEntityLocation {
 
     private World world;
     private Chunk chunk;
+
+    @Getter(AccessLevel.NONE)
     private BlockLocation blockLocation;
 
     /**
