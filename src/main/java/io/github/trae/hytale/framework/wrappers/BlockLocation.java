@@ -7,6 +7,7 @@ import io.github.trae.hytale.framework.wrappers.interfaces.IBlockLocation;
 import io.github.trae.utilities.UtilJava;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.joml.Vector3d;
 import org.joml.Vector3i;
 
 import java.util.LinkedHashMap;
@@ -79,6 +80,16 @@ public class BlockLocation implements IBlockLocation {
     @Override
     public Vector3i getPosition() {
         return new Vector3i(this.getX(), this.getY(), this.getZ());
+    }
+
+    /**
+     * Converts this block location to a {@link Vector3d} position vector.
+     *
+     * @return the double-precision position vector
+     */
+    @Override
+    public Vector3d getPosition3d() {
+        return new Vector3d(this.getX(), this.getY(), this.getZ());
     }
 
     /**
