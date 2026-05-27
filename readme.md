@@ -15,7 +15,7 @@ Hytale-Plugin-Framework bridges the Hytale plugin lifecycle with the component-b
 - Custom event base classes with cancellation reasons
 - World-thread-aware task execution with `CompletableFuture` bridging
 - Internal plugin registry for framework-managed plugin lookup
-- Designed for modern Java (Java 21+)
+- Designed for modern Java (Java 25+)
 
 ---
 
@@ -48,7 +48,7 @@ The following is only needed at compile time for annotation processing:
 <dependency>
     <groupId>org.projectlombok</groupId>
     <artifactId>lombok</artifactId>
-    <version>1.18.36</version>
+    <version>1.18.44</version>
     <scope>provided</scope>
 </dependency>
 ```
