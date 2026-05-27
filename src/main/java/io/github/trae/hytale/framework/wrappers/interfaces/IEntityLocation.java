@@ -1,9 +1,9 @@
 package io.github.trae.hytale.framework.wrappers.interfaces;
 
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import io.github.trae.hytale.framework.wrappers.BlockLocation;
 import io.github.trae.hytale.framework.wrappers.Location;
+import org.joml.Vector3d;
 
 public interface IEntityLocation extends Location {
 
@@ -11,5 +11,5 @@ public interface IEntityLocation extends Location {
 
     Vector3d getPosition();
 
-    Vector3f getRotation();
+    Rotation3f getRotation();
 }

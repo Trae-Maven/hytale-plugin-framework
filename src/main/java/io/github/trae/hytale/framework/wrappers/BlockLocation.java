@@ -1,6 +1,5 @@
 package io.github.trae.hytale.framework.wrappers;
 
-import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -8,6 +7,7 @@ import io.github.trae.hytale.framework.wrappers.interfaces.IBlockLocation;
 import io.github.trae.utilities.UtilJava;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.joml.Vector3i;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -34,7 +34,7 @@ public class BlockLocation implements IBlockLocation {
      * @return a new BlockLocation
      */
     public static BlockLocation of(final World world, final Vector3i vector3i) {
-        return new BlockLocation(world.getName(), vector3i.getX(), vector3i.getY(), vector3i.getZ());
+        return new BlockLocation(world.getName(), vector3i.x(), vector3i.y(), vector3i.z());
     }
 
     /**

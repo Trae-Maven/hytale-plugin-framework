@@ -53,6 +53,8 @@ import java.util.function.Consumer;
  */
 public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Manager<Plugin>, IAbstractSidebarManager {
 
+    private static final String CUSTOM_HUD_KEY = "sidebar";
+
     /**
      * The maximum number of line rows available in the {@code sidebar.ui} layout.
      *
@@ -110,7 +112,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         }
 
         if (this.sidebarMap.remove(playerRef.getUuid()) != null) {
-            this.execute(playerRef, player -> player.getHudManager().setCustomHud(playerRef, null));
+            this.execute(playerRef, player -> player.getHudManager().removeCustomHud(playerRef, CUSTOM_HUD_KEY));
         }
     }
 
@@ -191,7 +193,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
      * @param sidebar   the sidebar content
      */
     private void createSidebar(final PlayerRef playerRef, final Sidebar sidebar) {
-        final CustomUIHud customHud = new CustomUIHud(playerRef) {
+        final CustomUIHud customHud = new CustomUIHud(playerRef, CUSTOM_HUD_KEY) {
             @Override
             protected void build(@Nonnull final UICommandBuilder uiCommandBuilder) {
                 uiCommandBuilder.append("sidebar.ui");
@@ -212,7 +214,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
         };
 
         this.execute(playerRef, player -> {
-            player.getHudManager().setCustomHud(playerRef, customHud);
+            player.getHudManager().addCustomHud(playerRef, customHud);
 
             this.sidebarMap.put(playerRef.getUuid(), sidebar);
         });
@@ -268,7 +270,7 @@ public class AbstractSidebarManager<Plugin extends HytalePlugin> implements Mana
 
         if (dirty) {
             this.execute(playerRef, player -> {
-                final CustomUIHud customHud = player.getHudManager().getCustomHud();
+                final CustomUIHud customHud = player.getHudManager().getCustomHud(CUSTOM_HUD_KEY);
                 if (customHud != null) {
                     customHud.update(false, uiCommandBuilder);
                     this.sidebarMap.put(playerRef.getUuid(), sidebar);

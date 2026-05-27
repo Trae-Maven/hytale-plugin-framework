@@ -4,7 +4,6 @@ import com.hypixel.hytale.component.Archetype;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.server.core.entity.Entity;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -15,6 +14,7 @@ import io.github.trae.hytale.framework.wrappers.interfaces.IChunk;
 import io.github.trae.utilities.UtilJava;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -67,7 +67,7 @@ public class Chunk implements IChunk {
     private World world;
 
     public static Chunk of(final World world, final Vector3d vector3d) {
-        return new Chunk(world.getName(), (int) Math.floor(vector3d.getX()) >> 5, (int) Math.floor(vector3d.getZ()) >> 5);
+        return new Chunk(world.getName(), (int) Math.floor(vector3d.x()) >> 5, (int) Math.floor(vector3d.z()) >> 5);
     }
 
     /**

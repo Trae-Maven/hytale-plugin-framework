@@ -1,6 +1,5 @@
 package io.github.trae.hytale.framework.utility.message;
 
-import com.hypixel.hytale.protocol.MaybeBool;
 import com.hypixel.hytale.server.core.Message;
 import io.github.trae.hytale.framework.utility.enums.ChatColor;
 import lombok.experimental.UtilityClass;
@@ -245,7 +244,7 @@ public class MessageParser {
     private static Message buildSegment(final String text, final Color color, final boolean bold,
                                         final boolean italic, final boolean monospace, final boolean underline) {
         final Message message = Message.raw(text).color(color).bold(bold).italic(italic).monospace(monospace);
-        message.getFormattedMessage().underlined = underline ? MaybeBool.True : MaybeBool.False;
+        message.getFormattedMessage().underlined = underline;
         return message;
     }
 
@@ -262,7 +261,7 @@ public class MessageParser {
      */
     private static Message buildTranslationSegment(final String key, final Color color, final boolean bold, final boolean italic, final boolean monospace, final boolean underline) {
         final Message message = Message.translation(key).color(color).bold(bold).italic(italic).monospace(monospace);
-        message.getFormattedMessage().underlined = underline ? MaybeBool.True : MaybeBool.False;
+        message.getFormattedMessage().underlined = underline;
         return message;
     }
 

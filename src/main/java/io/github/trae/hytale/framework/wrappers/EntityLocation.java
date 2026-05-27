@@ -1,7 +1,6 @@
 package io.github.trae.hytale.framework.wrappers;
 
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -9,6 +8,7 @@ import io.github.trae.hytale.framework.wrappers.interfaces.IEntityLocation;
 import io.github.trae.utilities.UtilJava;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.joml.Vector3d;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -18,7 +18,7 @@ import java.util.Objects;
  * Used for entity-level operations where sub-block precision is needed.
  *
  * <p>Rotation follows the Hytale SDK convention where {@link TransformComponent#getRotation()}
- * returns a {@link Vector3f} with x=pitch, y=yaw, z=roll.</p>
+ * returns a {@link Rotation3f} with x=pitch, y=yaw, z=roll.</p>
  */
 @RequiredArgsConstructor
 @Getter
@@ -43,15 +43,15 @@ public class EntityLocation implements IEntityLocation {
      * Creates an EntityLocation from a Hytale SDK position vector with no rotation.
      */
     public static EntityLocation of(final World world, final Vector3d vector3d) {
-        return new EntityLocation(world, vector3d.getX(), vector3d.getY(), vector3d.getZ());
+        return new EntityLocation(world, vector3d.x(), vector3d.y(), vector3d.z());
     }
 
     /**
      * Creates an EntityLocation from a Hytale SDK position and rotation vector.
-     * Rotation is mapped as: yaw = vector3f.y, pitch = vector3f.x.
+     * Rotation is mapped as: yaw = rotation3f.y, pitch = rotation3f.x.
      */
-    public static EntityLocation of(final World world, final Vector3d vector3d, final Vector3f vector3f) {
-        return new EntityLocation(world.getName(), vector3d.getX(), vector3d.getY(), vector3d.getZ(), vector3f.getY(), vector3f.getX());
+    public static EntityLocation of(final World world, final Vector3d vector3d, final Rotation3f rotation3f) {
+        return new EntityLocation(world.getName(), vector3d.x(), vector3d.y(), vector3d.z(), rotation3f.yaw(), rotation3f.pitch());
     }
 
     /**
@@ -109,18 +109,18 @@ public class EntityLocation implements IEntityLocation {
     }
 
     /**
-     * Converts this entity location to a {@link Vector3f} rotation vector.
+     * Converts this entity location to a {@link Rotation3f} rotation.
      *
      * <p>Rotation follows the Hytale SDK convention where:
      * x = pitch, y = yaw, z = roll.</p>
      *
      * <p>Roll is always set to 0.</p>
      *
-     * @return the float rotation vector
+     * @return the rotation
      */
     @Override
-    public Vector3f getRotation() {
-        return new Vector3f(this.getYaw(), this.getPitch());
+    public Rotation3f getRotation() {
+        return new Rotation3f(this.getPitch(), this.getYaw(), 0.0F);
     }
 
     /**
