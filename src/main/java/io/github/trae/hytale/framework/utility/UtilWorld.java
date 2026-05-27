@@ -1,6 +1,7 @@
 package io.github.trae.hytale.framework.utility;
 
 import com.hypixel.hytale.server.core.receiver.IMessageReceiver;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import io.github.trae.hytale.framework.utility.enums.ChatColor;
@@ -8,6 +9,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Utility class for world-related helper methods.
@@ -42,5 +44,25 @@ public class UtilWorld {
                 name,
                 inform
         );
+    }
+
+    /**
+     * Resolves the world a player is currently in from their {@link PlayerRef}.
+     *
+     * <p>Retrieves the player's world UUID and looks up the corresponding
+     * {@link World} instance from the {@link Universe}. Returns empty if
+     * the player has no world UUID (e.g. not yet spawned) or the world
+     * is not loaded.</p>
+     *
+     * @param playerRef the player reference to resolve the world for
+     * @return an {@link Optional} containing the player's world, or empty
+     */
+    public static Optional<World> getWorldByPlayerRef(final PlayerRef playerRef) {
+        final UUID worldUuid = playerRef.getWorldUuid();
+        if (worldUuid == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(Universe.get().getWorld(worldUuid));
     }
 }
