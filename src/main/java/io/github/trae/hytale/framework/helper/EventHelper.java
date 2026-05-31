@@ -62,7 +62,7 @@ public class EventHelper extends AbstractHelper<EventListener> {
             this.getEventClassByMethod(method).ifPresent(eventClass -> {
                 final EventRegistration<?, ?> eventRegistration = this.getEventRegistration(listener, method, eventClass);
 
-                this.REGISTRATIONS.computeIfAbsent(listener, __ -> new ArrayList<>()).add(eventRegistration);
+                this.REGISTRATIONS.computeIfAbsent(listener, _ -> new ArrayList<>()).add(eventRegistration);
             });
         }
     }

@@ -113,7 +113,7 @@ public class SystemHelper extends AbstractHelper<SystemListener> {
                 final RefChangeHandler refChangeAnnotation = method.getAnnotation(RefChangeHandler.class);
                 final Class<?> componentClass = this.resolveRefChangeComponentClass(method);
                 if (componentClass != null) {
-                    refChangeGroups.computeIfAbsent(componentClass, __ -> new EnumMap<>(RefChangeType.class)).put(refChangeAnnotation.type(), method);
+                    refChangeGroups.computeIfAbsent(componentClass, _ -> new EnumMap<>(RefChangeType.class)).put(refChangeAnnotation.type(), method);
                     refChangeAnnotations.putIfAbsent(componentClass, refChangeAnnotation);
                     refChangeSampleMethods.putIfAbsent(componentClass, method);
                 }
