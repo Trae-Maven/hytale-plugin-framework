@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Utility class for player-related helper methods.
@@ -84,22 +85,29 @@ public class UtilPlayer {
     }
 
     /**
-     * Search online players for a {@link PlayerRef} by username.
-     * <p>
-     * Delegates to {@link UtilSearch#search} with case-insensitive exact
-     * and partial (contains) matching on {@link PlayerRef#getUsername()}.
+     * Searches online players for a {@link PlayerRef} by username.
      *
-     * @param messageReceiver receiver for result or ambiguity messages
-     * @param input           username or partial username to search for
+     * <p>Delegates to {@link UtilSearch#search} with case-insensitive exact
+     * and partial (contains) matching on {@link PlayerRef#getUsername()}.
+     * An optional predicate can be used to filter candidates before matching.</p>
+     *
+     * @param messageReceiver the receiver for result or ambiguity messages
+     * @param input           the username or partial username to search for
      * @param inform          whether to send a result message to the receiver
-     * @return the matched player reference, or {@link Optional#empty()} if zero or multiple matches were found
+     * @param predicate       an optional predicate to filter candidates, or {@code null} for no filtering
+     * @return an {@link Optional} containing the matched player reference,
+     *         or empty if zero or multiple matches were found
      */
-    public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform) {
+    public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform, final Predicate<PlayerRef> predicate) {
         return UtilSearch.search(
                 Universe.get().getPlayers(),
                 playerRef -> playerRef.getUsername().equalsIgnoreCase(input),
                 playerRef -> playerRef.getUsername().toLowerCase(Locale.ROOT).contains(input.toLowerCase(Locale.ROOT)),
-                null,
+                list -> {
+                    if (predicate != null) {
+                        list.removeIf(playerRef -> !(predicate.test(playerRef)));
+                    }
+                },
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
                 PlayerRef::getUsername,
                 "Player Search",
@@ -107,5 +115,21 @@ public class UtilPlayer {
                 input,
                 inform
         );
+    }
+
+    /**
+     * Searches online players for a {@link PlayerRef} by username.
+     *
+     * <p>Convenience overload of {@link #searchPlayerRef(IMessageReceiver, String, boolean, Predicate)}
+     * with no predicate filtering applied.</p>
+     *
+     * @param messageReceiver the receiver for result or ambiguity messages
+     * @param input           the username or partial username to search for
+     * @param inform          whether to send a result message to the receiver
+     * @return an {@link Optional} containing the matched player reference,
+     *         or empty if zero or multiple matches were found
+     */
+    public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform) {
+        return searchPlayerRef(messageReceiver, input, inform, null);
     }
 }

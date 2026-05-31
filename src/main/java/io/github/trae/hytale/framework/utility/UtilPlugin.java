@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Utility class for managing and querying plugins within the Hytale server environment.
@@ -159,21 +160,28 @@ public class UtilPlugin {
      *
      * <p>First attempts an exact case-insensitive match on the plugin's
      * {@link PluginIdentifier}. If no exact match is found, falls back to
-     * a case-insensitive contains check. If {@code inform} is {@code true}
+     * a case-insensitive contains check. An optional predicate can be used
+     * to filter candidates before matching. If {@code inform} is {@code true}
      * and no match is found or multiple matches are ambiguous, a formatted
      * message is sent to the receiver.</p>
      *
      * @param messageReceiver the receiver to send search feedback to
      * @param name            the plugin name or partial name to search for
      * @param inform          whether to send feedback messages on failure
+     * @param predicate       an optional predicate to filter candidates, or {@code null} for no filtering
      * @return an {@link Optional} containing the matched plugin, or empty
+     *         if zero or multiple matches were found
      */
-    public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
+    public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<PluginBase> predicate) {
         return UtilSearch.search(
                 getPlugins(),
                 pluginBase -> pluginBase.getIdentifier().toString().equalsIgnoreCase(name),
                 pluginBase -> pluginBase.getIdentifier().toString().toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)),
-                null,
+                list -> {
+                    if (predicate != null) {
+                        list.removeIf(pluginBase -> !(predicate.test(pluginBase)));
+                    }
+                },
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
                 pluginBase -> pluginBase.getIdentifier().toString(),
                 "External Plugin Search",
@@ -184,25 +192,48 @@ public class UtilPlugin {
     }
 
     /**
+     * Searches for an external plugin by name with fuzzy matching.
+     *
+     * <p>Convenience overload of {@link #searchExternalPlugin(IMessageReceiver, String, boolean, Predicate)}
+     * with no predicate filtering applied.</p>
+     *
+     * @param messageReceiver the receiver to send search feedback to
+     * @param name            the plugin name or partial name to search for
+     * @param inform          whether to send feedback messages on failure
+     * @return an {@link Optional} containing the matched plugin, or empty
+     *         if zero or multiple matches were found
+     */
+    public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
+        return searchExternalPlugin(messageReceiver, name, inform, null);
+    }
+
+    /**
      * Searches for an internal {@link HytalePlugin} by name with fuzzy matching.
      *
      * <p>First attempts an exact case-insensitive match on the plugin's
      * display name. If no exact match is found, falls back to a
-     * case-insensitive contains check. If {@code inform} is {@code true}
+     * case-insensitive contains check. An optional predicate can be used
+     * to filter candidates before matching. If {@code inform} is {@code true}
      * and no match is found or multiple matches are ambiguous, a formatted
      * message is sent to the receiver.</p>
      *
      * @param messageReceiver the receiver to send search feedback to
      * @param name            the plugin name or partial name to search for
      * @param inform          whether to send feedback messages on failure
+     * @param predicate       an optional predicate to filter candidates, or {@code null} for no filtering
      * @return an {@link Optional} containing the matched plugin, or empty
+     *         if zero or multiple matches were found
      */
-    public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
+    public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<HytalePlugin> predicate) {
         return UtilSearch.search(
                 getInternalPlugins(),
                 hytalePlugin -> hytalePlugin.getPluginName().equalsIgnoreCase(name),
                 hytalePlugin -> hytalePlugin.getPluginName().toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)),
-                null,
+                list -> {
+                    if (predicate != null) {
+                        list.removeIf(hytalePlugin -> !(predicate.test(hytalePlugin)));
+                    }
+                },
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
                 HytalePlugin::getPluginName,
                 "Internal Plugin Search",
@@ -210,5 +241,21 @@ public class UtilPlugin {
                 name,
                 inform
         );
+    }
+
+    /**
+     * Searches for an internal {@link HytalePlugin} by name with fuzzy matching.
+     *
+     * <p>Convenience overload of {@link #searchInternalPlugin(IMessageReceiver, String, boolean, Predicate)}
+     * with no predicate filtering applied.</p>
+     *
+     * @param messageReceiver the receiver to send search feedback to
+     * @param name            the plugin name or partial name to search for
+     * @param inform          whether to send feedback messages on failure
+     * @return an {@link Optional} containing the matched plugin, or empty
+     *         if zero or multiple matches were found
+     */
+    public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
+        return searchInternalPlugin(messageReceiver, name, inform, null);
     }
 }
