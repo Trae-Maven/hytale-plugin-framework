@@ -1,12 +1,10 @@
 package io.github.trae.hytale.framework.helper;
 
-import com.hypixel.hytale.event.EventRegistration;
-import com.hypixel.hytale.event.EventRegistry;
-import com.hypixel.hytale.event.IAsyncEvent;
-import com.hypixel.hytale.event.IBaseEvent;
+import com.hypixel.hytale.event.*;
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.event.EventListener;
 import io.github.trae.hytale.framework.event.annotations.EventHandler;
+import io.github.trae.hytale.framework.event.exceptions.EventException;
 import io.github.trae.hytale.framework.helper.abstracts.AbstractHelper;
 import io.github.trae.utilities.UtilMethod;
 
@@ -119,7 +117,7 @@ public class EventHelper extends AbstractHelper<EventListener> {
      * is read from the {@link EventHandler} annotation on the method.</p>
      *
      * <p>Handler invocation is delegated to {@link UtilMethod#invoke(Method, Object, Object...)}
-     * with exceptions wrapped in a {@link RuntimeException}.</p>
+     * with exceptions wrapped in an {@link EventException}.
      *
      * @param listener   the listener instance that owns the method
      * @param method     the annotated handler method
@@ -131,27 +129,70 @@ public class EventHelper extends AbstractHelper<EventListener> {
 
         final EventHandler annotation = method.getAnnotation(EventHandler.class);
 
+        final short priority = (short) annotation.priority();
+
         // Async events are registered with thenApply chaining on the CompletableFuture
         if (IAsyncEvent.class.isAssignableFrom(eventClass)) {
-            return eventRegistry.registerAsync((short) annotation.priority(), eventClass, completableFuture ->
-                    completableFuture.thenApply(event -> {
-                        try {
-                            UtilMethod.invoke(method, listener, event);
-                        } catch (final Exception e) {
-                            throw new RuntimeException(e);
+            if (annotation.global()) {
+                return eventRegistry.registerAsyncGlobal(priority, eventClass, completableFuture -> completableFuture.thenApply(
+                        event -> {
+                            if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
+                                return event;
+                            }
+
+                            try {
+                                UtilMethod.invoke(method, listener, event);
+                            } catch (final Exception e) {
+                                throw new EventException("Failed to invoke event handler %s in %s".formatted(method.getName(), listener.getClass().getSimpleName()), e);
+                            }
+
+                            return event;
                         }
-                        return event;
-                    })
-            );
+                ));
+            } else {
+                return eventRegistry.registerAsync(priority, eventClass, completableFuture -> completableFuture.thenApply(
+                        event -> {
+                            if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
+                                return event;
+                            }
+
+                            try {
+                                UtilMethod.invoke(method, listener, event);
+                            } catch (final Exception e) {
+                                throw new EventException("Failed to invoke event handler %s in %s".formatted(method.getName(), listener.getClass().getSimpleName()), e);
+                            }
+
+                            return event;
+                        }
+                ));
+            }
         }
 
         // Synchronous events are registered with a direct consumer
-        return eventRegistry.register((short) annotation.priority(), eventClass, event -> {
-            try {
-                UtilMethod.invoke(method, listener, event);
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+        if (annotation.global()) {
+            return eventRegistry.registerGlobal(priority, eventClass, event -> {
+                if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
+                    return;
+                }
+
+                try {
+                    UtilMethod.invoke(method, listener, event);
+                } catch (final Exception e) {
+                    throw new EventException("Failed to invoke event handler %s in %s".formatted(method.getName(), listener.getClass().getSimpleName()), e);
+                }
+            });
+        } else {
+            return eventRegistry.register(priority, eventClass, event -> {
+                if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
+                    return;
+                }
+
+                try {
+                    UtilMethod.invoke(method, listener, event);
+                } catch (final Exception e) {
+                    throw new EventException("Failed to invoke event handler %s in %s".formatted(method.getName(), listener.getClass().getSimpleName()), e);
+                }
+            });
+        }
     }
 }

@@ -17,6 +17,24 @@ import java.lang.annotation.Target;
 public @interface EventHandler {
 
     /**
+     * Whether this handler should receive events dispatched under any key (global),
+     * or only events dispatched without a key (keyed to {@link Void}).
+     *
+     * <p>Set to {@code true} for events that are keyed by a non-{@link Void} type
+     * (e.g. {@link com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent}
+     * which is keyed by world name), so the handler receives all dispatches regardless
+     * of key. When {@code false}, registration uses the standard keyless overload and
+     * will only receive {@link Void}-keyed events.</p>
+     *
+     * <p>Defaults to {@code false}. Only set to {@code true} when the target event
+     * implements {@link com.hypixel.hytale.event.IBaseEvent} with a non-{@link Void}
+     * key type.</p>
+     *
+     * @return {@code true} to register globally, {@code false} for keyless registration
+     */
+    boolean global() default false;
+
+    /**
      * The priority of this handler. Handlers with lower values execute first.
      *
      * <p>Defaults to {@link EventPriority#NORMAL}. Use constants from {@link EventPriority}
