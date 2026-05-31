@@ -5,6 +5,7 @@ import com.hypixel.hytale.component.dependency.Dependency;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Collections;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -15,7 +16,7 @@ public class SystemExtension<ECS_TYPE> {
     private final Set<Dependency<ECS_TYPE>> dependencies;
 
     public SystemExtension(final SystemGroup<ECS_TYPE> group) {
-        this(group, null);
+        this(group, Collections.emptySet());
     }
 
     public SystemExtension(final Set<Dependency<ECS_TYPE>> dependencies) {
