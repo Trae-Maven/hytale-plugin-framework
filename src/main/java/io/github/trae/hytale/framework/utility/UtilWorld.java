@@ -38,13 +38,10 @@ public class UtilWorld {
     public static Optional<World> searchWorld(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<World> predicate) {
         return UtilSearch.search(
                 Universe.get().getWorlds().values(),
+                predicate,
                 world -> world.getName().equalsIgnoreCase(name),
                 world -> world.getName().toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)),
-                list -> {
-                    if (predicate != null) {
-                        list.removeIf(world -> !(predicate.test(world)));
-                    }
-                },
+                null,
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
                 World::getName,
                 "World Search",

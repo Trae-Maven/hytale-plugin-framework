@@ -175,13 +175,10 @@ public class UtilPlugin {
     public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<PluginBase> predicate) {
         return UtilSearch.search(
                 getPlugins(),
+                predicate,
                 pluginBase -> pluginBase.getIdentifier().toString().equalsIgnoreCase(name),
                 pluginBase -> pluginBase.getIdentifier().toString().toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)),
-                list -> {
-                    if (predicate != null) {
-                        list.removeIf(pluginBase -> !(predicate.test(pluginBase)));
-                    }
-                },
+                null,
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
                 pluginBase -> pluginBase.getIdentifier().toString(),
                 "External Plugin Search",
@@ -227,13 +224,10 @@ public class UtilPlugin {
     public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<HytalePlugin> predicate) {
         return UtilSearch.search(
                 getInternalPlugins(),
+                predicate,
                 hytalePlugin -> hytalePlugin.getPluginName().equalsIgnoreCase(name),
                 hytalePlugin -> hytalePlugin.getPluginName().toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)),
-                list -> {
-                    if (predicate != null) {
-                        list.removeIf(hytalePlugin -> !(predicate.test(hytalePlugin)));
-                    }
-                },
+                null,
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
                 HytalePlugin::getPluginName,
                 "Internal Plugin Search",

@@ -101,13 +101,10 @@ public class UtilPlayer {
     public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform, final Predicate<PlayerRef> predicate) {
         return UtilSearch.search(
                 Universe.get().getPlayers(),
+                predicate,
                 playerRef -> playerRef.getUsername().equalsIgnoreCase(input),
                 playerRef -> playerRef.getUsername().toLowerCase(Locale.ROOT).contains(input.toLowerCase(Locale.ROOT)),
-                list -> {
-                    if (predicate != null) {
-                        list.removeIf(playerRef -> !(predicate.test(playerRef)));
-                    }
-                },
+                null,
                 string -> UtilColor.serialize(ChatColor.YELLOW.getColor(), string),
                 PlayerRef::getUsername,
                 "Player Search",
