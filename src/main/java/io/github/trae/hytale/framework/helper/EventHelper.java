@@ -124,6 +124,7 @@ public class EventHelper extends AbstractHelper<EventListener> {
      * @param eventClass the resolved event class
      * @return the resulting {@link EventRegistration}
      */
+    @SuppressWarnings("unchecked")
     private EventRegistration<?, ?> getEventRegistration(final EventListener listener, final Method method, final Class<IBaseEvent<?>> eventClass) {
         final EventRegistry eventRegistry = this.getPlugin().getEventRegistry();
 
@@ -134,7 +135,7 @@ public class EventHelper extends AbstractHelper<EventListener> {
         // Async events are registered with thenApply chaining on the CompletableFuture
         if (IAsyncEvent.class.isAssignableFrom(eventClass)) {
             if (annotation.global()) {
-                return eventRegistry.registerAsyncGlobal(priority, eventClass, completableFuture -> completableFuture.thenApply(
+                return eventRegistry.registerAsyncGlobal(priority, (Class<IAsyncEvent<Object>>) (Class<?>) eventClass, completableFuture -> completableFuture.thenApply(
                         event -> {
                             if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
                                 return event;
@@ -150,7 +151,7 @@ public class EventHelper extends AbstractHelper<EventListener> {
                         }
                 ));
             } else {
-                return eventRegistry.registerAsync(priority, eventClass, completableFuture -> completableFuture.thenApply(
+                return eventRegistry.registerAsync(priority, (Class<IAsyncEvent<Void>>) (Class<?>) eventClass, completableFuture -> completableFuture.thenApply(
                         event -> {
                             if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
                                 return event;
@@ -170,7 +171,7 @@ public class EventHelper extends AbstractHelper<EventListener> {
 
         // Synchronous events are registered with a direct consumer
         if (annotation.global()) {
-            return eventRegistry.registerGlobal(priority, eventClass, event -> {
+            return eventRegistry.registerGlobal(priority, (Class<IEvent<Object>>) (Class<?>) eventClass, event -> {
                 if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
                     return;
                 }
@@ -182,7 +183,7 @@ public class EventHelper extends AbstractHelper<EventListener> {
                 }
             });
         } else {
-            return eventRegistry.register(priority, eventClass, event -> {
+            return eventRegistry.register(priority, (Class<IEvent<Void>>) (Class<?>) eventClass, event -> {
                 if (annotation.ignoreCancelled() && event instanceof final ICancellable cancellable && cancellable.isCancelled()) {
                     return;
                 }
