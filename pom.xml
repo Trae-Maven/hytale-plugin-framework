@@ -50,8 +50,7 @@
         <dependency>
             <groupId>com.hypixel.hytale</groupId>
             <artifactId>Server</artifactId>
-            <version>0.5.1</version>
-            <type>jar</type>
+            <version>0.5.3</version>
             <scope>provided</scope>
         </dependency>
 
