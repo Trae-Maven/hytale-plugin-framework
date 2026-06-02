@@ -72,7 +72,7 @@ public class UtilPlayer {
      *
      * @param player the player to resolve the IP address for
      * @return an {@link Optional} containing the IP address string,
-     *         or empty if the address cannot be resolved
+     * or empty if the address cannot be resolved
      */
     public static Optional<String> getIpAddress(final PlayerRef player) {
         final SocketAddress socketAddress = player.getPacketHandler().getChannel().remoteAddress();
@@ -96,7 +96,7 @@ public class UtilPlayer {
      * @param inform          whether to send a result message to the receiver
      * @param predicate       an optional predicate to filter candidates, or {@code null} for no filtering
      * @return an {@link Optional} containing the matched player reference,
-     *         or empty if zero or multiple matches were found
+     * or empty if zero or multiple matches were found
      */
     public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform, final Predicate<PlayerRef> predicate) {
         return UtilSearch.search(
@@ -124,7 +124,7 @@ public class UtilPlayer {
      * @param input           the username or partial username to search for
      * @param inform          whether to send a result message to the receiver
      * @return an {@link Optional} containing the matched player reference,
-     *         or empty if zero or multiple matches were found
+     * or empty if zero or multiple matches were found
      */
     public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform) {
         return searchPlayerRef(messageReceiver, input, inform, null);

@@ -1,31 +1,39 @@
 package io.github.trae.hytale.framework.helper;
 
-import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandRegistration;
 import io.github.trae.hytale.framework.HytalePlugin;
+import io.github.trae.hytale.framework.command.BaseCommand;
+import io.github.trae.hytale.framework.command.BaseSubCommand;
+import io.github.trae.hytale.framework.command.impl.SharedBaseCommand;
 import io.github.trae.hytale.framework.helper.abstracts.AbstractHelper;
 import io.github.trae.hytale.framework.helper.interfaces.Processable;
 
 import java.util.LinkedHashMap;
+import java.util.Optional;
 
 /**
  * Helper responsible for managing command registrations within a {@link HytalePlugin}.
  *
- * <p>Commands are queued via {@link #register(AbstractCommand)} and bulk-registered
+ * <p>Parent commands are queued via {@link #register(SharedBaseCommand)} and bulk-registered
  * against the plugin's {@link com.hypixel.hytale.server.core.command.system.CommandRegistry}
  * when {@link #process()} is invoked. This two-phase approach allows all commands to
  * be declared during plugin initialization and registered in a single pass.</p>
  *
- * <p>Each command is tracked alongside its {@link CommandRegistration}, enabling
- * clean unregistration via {@link #unregister(AbstractCommand)}.</p>
+ * <p>Sub-commands are attached directly to their parent module's command at
+ * registration time and are not tracked for bulk processing.</p>
+ *
+ * <p>Each parent command is tracked alongside its {@link CommandRegistration}, enabling
+ * clean unregistration via {@link #unregister(SharedBaseCommand)}.</p>
  */
-public class CommandHelper extends AbstractHelper<AbstractCommand> implements Processable {
+public class CommandHelper extends AbstractHelper<SharedBaseCommand<?>> implements Processable {
 
     /**
-     * Map of commands to their registration handles.
-     * A {@code null} value indicates the command has been queued but not yet processed.
+     * Map of parent commands to their registration handles.
+     *
+     * <p>A {@code null} value indicates the command has been queued but not yet
+     * registered via {@link #process()}.</p>
      */
-    private final LinkedHashMap<AbstractCommand, CommandRegistration> REGISTRATIONS = new LinkedHashMap<>();
+    private final LinkedHashMap<BaseCommand<?, ?, ?>, CommandRegistration> REGISTRATIONS = new LinkedHashMap<>();
 
     /**
      * Creates a new {@link CommandHelper} bound to the given plugin.
@@ -39,35 +47,50 @@ public class CommandHelper extends AbstractHelper<AbstractCommand> implements Pr
     /**
      * Queues a command for registration.
      *
-     * <p>The command is stored with a {@code null} registration handle, which
-     * will be resolved to an active {@link CommandRegistration} when
-     * {@link #process()} is called. If the command is already queued or
-     * registered, this call is a no-op ({@code putIfAbsent}).</p>
+     * <p>If the command is a {@link BaseCommand}, it is added to the registration queue
+     * with a {@code null} handle, to be processed later by {@link #process()}.</p>
      *
-     * @param abstractCommand the command to register
+     * <p>If the command is a {@link BaseSubCommand}, it is immediately attached to its
+     * parent module's command and is not queued.</p>
+     *
+     * @param sharedBaseCommand the command to register
      */
     @Override
-    public void register(final AbstractCommand abstractCommand) {
-        this.REGISTRATIONS.putIfAbsent(abstractCommand, null);
+    public void register(final SharedBaseCommand<?> sharedBaseCommand) {
+        // Parent Command
+        if (sharedBaseCommand instanceof final BaseCommand<?, ?, ?> baseCommand) {
+            this.REGISTRATIONS.putIfAbsent(baseCommand, null);
+        }
+
+        // Sub Command
+        if (sharedBaseCommand instanceof final BaseSubCommand<?, ?, ?> baseSubCommand) {
+            baseSubCommand.getModule().getAbstractCommand().addSubCommand(baseSubCommand.getAbstractCommand());
+        }
     }
 
     /**
-     * Unregisters a command and removes it from the registry.
+     * Unregisters a previously registered command.
      *
-     * <p>If the command has an active {@link CommandRegistration}, it is
-     * unregistered from the command system. If the command was queued
-     * but never processed, it is simply removed.</p>
+     * <p>If the command is a {@link BaseCommand}, it is removed from the registration
+     * queue and, if it had an active {@link CommandRegistration}, that registration is
+     * released.</p>
      *
-     * @param abstractCommand the command to unregister
+     * <p>If the command is a {@link BaseSubCommand}, it is detached from its parent
+     * module's command.</p>
+     *
+     * @param sharedBaseCommand the command to unregister
      */
     @Override
-    public void unregister(final AbstractCommand abstractCommand) {
-        final CommandRegistration registration = this.REGISTRATIONS.remove(abstractCommand);
-        if (registration == null) {
-            return;
+    public void unregister(final SharedBaseCommand<?> sharedBaseCommand) {
+        // Parent Command
+        if (sharedBaseCommand instanceof final BaseCommand<?, ?, ?> baseCommand) {
+            Optional.ofNullable(this.REGISTRATIONS.remove(baseCommand)).ifPresent(CommandRegistration::unregister);
         }
 
-        registration.unregister();
+        // Sub Command
+        if (sharedBaseCommand instanceof final BaseSubCommand<?, ?, ?> baseSubCommand) {
+            baseSubCommand.getModule().getAbstractCommand().getSubCommands().remove(baseSubCommand.getAbstractCommand().getName());
+        }
     }
 
     /**
@@ -79,13 +102,13 @@ public class CommandHelper extends AbstractHelper<AbstractCommand> implements Pr
      */
     @Override
     public void process() {
-        this.REGISTRATIONS.replaceAll((abstractCommand, registration) -> {
+        this.REGISTRATIONS.replaceAll((baseCommand, commandRegistration) -> {
             // Skip commands that are already registered
-            if (registration != null) {
-                return registration;
+            if (commandRegistration != null) {
+                return commandRegistration;
             }
 
-            return this.getPlugin().getCommandRegistry().registerCommand(abstractCommand);
+            return this.getPlugin().getCommandRegistry().registerCommand(baseCommand.getAbstractCommand());
         });
     }
 }

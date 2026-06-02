@@ -33,7 +33,7 @@ public class UtilWorld {
      * @param inform          whether to send feedback messages on failure
      * @param predicate       an optional predicate to filter candidates, or {@code null} for no filtering
      * @return an {@link Optional} containing the matched world, or empty
-     *         if zero or multiple matches were found
+     * if zero or multiple matches were found
      */
     public static Optional<World> searchWorld(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<World> predicate) {
         return UtilSearch.search(
@@ -61,7 +61,7 @@ public class UtilWorld {
      * @param name            the world name or partial name to search for
      * @param inform          whether to send feedback messages on failure
      * @return an {@link Optional} containing the matched world, or empty
-     *         if zero or multiple matches were found
+     * if zero or multiple matches were found
      */
     public static Optional<World> searchWorld(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
         return searchWorld(messageReceiver, name, inform, null);

@@ -1,7 +1,6 @@
 package io.github.trae.hytale.framework;
 
 import com.hypixel.hytale.server.core.HytaleServer;
-import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
 import com.hypixel.hytale.server.core.io.adapter.PacketWatcher;
 import com.hypixel.hytale.server.core.io.adapter.PlayerPacketFilter;
@@ -9,9 +8,8 @@ import com.hypixel.hytale.server.core.io.adapter.PlayerPacketWatcher;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import io.github.trae.di.InjectorApi;
-import io.github.trae.hf.Module;
 import io.github.trae.hf.Plugin;
-import io.github.trae.hf.SubModule;
+import io.github.trae.hytale.framework.command.impl.SharedBaseCommand;
 import io.github.trae.hytale.framework.event.EventListener;
 import io.github.trae.hytale.framework.helper.*;
 import io.github.trae.hytale.framework.plugin.events.PluginInitializeEvent;
@@ -20,7 +18,6 @@ import io.github.trae.hytale.framework.system.SystemListener;
 import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.hytale.framework.utility.UtilPlugin;
 import io.github.trae.hytale.framework.utility.UtilTask;
-import io.github.trae.utilities.UtilJava;
 import io.github.trae.utilities.UtilLogger;
 import lombok.Getter;
 
@@ -44,8 +41,10 @@ import javax.annotation.Nonnull;
  *   <li>{@link PlayerPacketWatcher} — registered with the packet pipeline via {@link PlayerPacketWatcherHelper}</li>
  *   <li>{@link PacketFilter} — registered with the packet pipeline via {@link PacketFilterHelper}</li>
  *   <li>{@link PlayerPacketFilter} — registered with the packet pipeline via {@link PlayerPacketFilterHelper}</li>
- *   <li>{@link AbstractCommand} as {@link Module} — registered with the command system via {@link CommandHelper}</li>
- *   <li>{@link AbstractCommand} as {@link SubModule} — attached to the parent command as a subcommand</li>
+ *   <li>{@link SharedBaseCommand} as {@link io.github.trae.hytale.framework.command.BaseCommand} —
+ *       queued for registration with the command system via {@link CommandHelper}</li>
+ *   <li>{@link SharedBaseCommand} as {@link io.github.trae.hytale.framework.command.BaseSubCommand} —
+ *       attached to its parent command as a subcommand via {@link CommandHelper}</li>
  * </ul>
  *
  * <p>Commands use a two-phase registration: they are queued during component
@@ -168,8 +167,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      *   <li>{@link PlayerPacketWatcher} — registered with the packet pipeline</li>
      *   <li>{@link PacketFilter} — registered with the packet pipeline</li>
      *   <li>{@link PlayerPacketFilter} — registered with the packet pipeline</li>
-     *   <li>{@link AbstractCommand} + {@link Module} — queued as a root command</li>
-     *   <li>{@link AbstractCommand} + {@link SubModule} — attached to the parent
+     *   <li>{@link SharedBaseCommand} (a {@code BaseCommand}) — queued as a root command</li>
+     *   <li>{@link SharedBaseCommand} (a {@code BaseSubCommand}) — attached to the parent
      *       module's command as a subcommand</li>
      * </ul>
      *
@@ -187,16 +186,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
             this.systemHelper.register(systemListener);
         }
 
-        // Root commands — queued for bulk registration during initializePlugin()
-        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
-            this.commandHelper.register(abstractCommand);
-        }
-
-        // Subcommands — attached directly to their parent command
-        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
-            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
-
-            abstractCommand.addSubCommand(abstractSubCommand);
+        if (instance instanceof final SharedBaseCommand<?> sharedBaseCommand) {
+            this.commandHelper.register(sharedBaseCommand);
         }
 
         if (instance instanceof final PacketWatcher packetWatcher) {
@@ -227,8 +218,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      *   <li>{@link PlayerPacketWatcher} — unregistered from the packet pipeline</li>
      *   <li>{@link PacketFilter} — unregistered from the packet pipeline</li>
      *   <li>{@link PlayerPacketFilter} — unregistered from the packet pipeline</li>
-     *   <li>{@link AbstractCommand} + {@link Module} — unregistered from the command system</li>
-     *   <li>{@link AbstractCommand} + {@link SubModule} — removed from the parent command's
+     *   <li>{@link SharedBaseCommand} (a {@code BaseCommand}) — unregistered from the command system</li>
+     *   <li>{@link SharedBaseCommand} (a {@code BaseSubCommand}) — removed from the parent command's
      *       subcommand map</li>
      * </ul>
      *
@@ -236,8 +227,6 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
      */
     @Override
     public void onComponentShutdown(final Object instance) {
-        Plugin.super.onComponentShutdown(instance);
-
         if (instance instanceof final EventListener listener) {
             this.eventHelper.unregister(listener);
         }
@@ -246,16 +235,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
             this.systemHelper.unregister(systemListener);
         }
 
-        // Root commands — unregistered from the command system
-        if (instance instanceof final AbstractCommand abstractCommand && instance instanceof Module<?, ?>) {
-            this.commandHelper.unregister(abstractCommand);
-        }
-
-        // Subcommands — removed from the parent command's subcommand map
-        if (instance instanceof final AbstractCommand abstractSubCommand && instance instanceof final SubModule<?, ?> subModule) {
-            final AbstractCommand abstractCommand = UtilJava.cast(AbstractCommand.class, subModule.getModule());
-
-            abstractCommand.getSubCommands().remove(abstractSubCommand.getName());
+        if (instance instanceof final SharedBaseCommand<?> sharedBaseCommand) {
+            this.commandHelper.unregister(sharedBaseCommand);
         }
 
         if (instance instanceof final PacketWatcher packetWatcher) {
@@ -273,5 +254,7 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
         if (instance instanceof final PlayerPacketFilter playerPacketFilter) {
             this.playerPacketFilterHelper.unregister(playerPacketFilter);
         }
+
+        Plugin.super.onComponentShutdown(instance);
     }
 }

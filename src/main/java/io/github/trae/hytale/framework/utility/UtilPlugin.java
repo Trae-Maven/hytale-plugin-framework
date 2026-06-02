@@ -170,7 +170,7 @@ public class UtilPlugin {
      * @param inform          whether to send feedback messages on failure
      * @param predicate       an optional predicate to filter candidates, or {@code null} for no filtering
      * @return an {@link Optional} containing the matched plugin, or empty
-     *         if zero or multiple matches were found
+     * if zero or multiple matches were found
      */
     public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<PluginBase> predicate) {
         return UtilSearch.search(
@@ -198,7 +198,7 @@ public class UtilPlugin {
      * @param name            the plugin name or partial name to search for
      * @param inform          whether to send feedback messages on failure
      * @return an {@link Optional} containing the matched plugin, or empty
-     *         if zero or multiple matches were found
+     * if zero or multiple matches were found
      */
     public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
         return searchExternalPlugin(messageReceiver, name, inform, null);
@@ -219,7 +219,7 @@ public class UtilPlugin {
      * @param inform          whether to send feedback messages on failure
      * @param predicate       an optional predicate to filter candidates, or {@code null} for no filtering
      * @return an {@link Optional} containing the matched plugin, or empty
-     *         if zero or multiple matches were found
+     * if zero or multiple matches were found
      */
     public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<HytalePlugin> predicate) {
         return UtilSearch.search(
@@ -247,7 +247,7 @@ public class UtilPlugin {
      * @param name            the plugin name or partial name to search for
      * @param inform          whether to send feedback messages on failure
      * @return an {@link Optional} containing the matched plugin, or empty
-     *         if zero or multiple matches were found
+     * if zero or multiple matches were found
      */
     public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform) {
         return searchInternalPlugin(messageReceiver, name, inform, null);
