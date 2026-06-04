@@ -168,7 +168,7 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
      */
     default void _Execute(final CommandSender commandSender, final String[] args) {
         if (this.canExecute(commandSender)) {
-            if (this instanceof final Confirmable confirmable && !(confirmable.isPreExecuteConfirmCheck()) && !(confirmable.hasConfirmed(commandSender))) {
+            if (this instanceof final Confirmable confirmable && confirmable.isPreExecuteConfirmCheck() && !(confirmable.hasConfirmed(commandSender))) {
                 return;
             }
 
