@@ -16,6 +16,6 @@ public interface Confirmable {
     }
 
     default void sendConfirmationMessage(final CommandSender commandSender) {
-        UtilMessage.message(commandSender, "Command", "Run the command again to confirm!");
+        UtilMessage.message(commandSender, "Command", "<red>Run the command again to confirm!</red>");
     }
 }
