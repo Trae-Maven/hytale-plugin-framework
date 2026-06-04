@@ -30,7 +30,7 @@ public class ConfirmableService implements IConfirmableService {
 
     @Override
     public boolean contains(final CommandSender commandSender, final Confirmable confirmable) {
-        this.map.values().removeIf(cache -> UtilTime.elapsed(cache.systemTime(), cache.confirmable().getExpiration()));
+        this.map.values().removeIf(cache -> UtilTime.elapsed(cache.systemTime(), cache.confirmable().getConfirmationExpiry()));
 
         return Optional.ofNullable(this.map.get(commandSender)).map(cache -> cache.confirmable().equals(confirmable)).orElse(false);
     }

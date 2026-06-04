@@ -3,9 +3,7 @@ package io.github.trae.hytale.framework.command.interfaces;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.console.ConsoleSender;
-import io.github.trae.di.InjectorApi;
 import io.github.trae.hytale.framework.command.impl.Confirmable;
-import io.github.trae.hytale.framework.command.service.ConfirmableService;
 import io.github.trae.hytale.framework.utility.UtilMessage;
 import io.github.trae.utilities.UtilGeneric;
 import io.github.trae.utilities.UtilJava;
@@ -155,25 +153,23 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
     /**
      * Internal dispatch entry point invoked by the engine command wrappers.
      *
-     * <p>Runs {@link #canExecute(CommandSender)} validation and, on success, casts the
-     * sender to the expected {@link Sender} type and delegates to
+     * <p>Runs {@link #canExecute(CommandSender)} validation and, on success,
+     * casts the sender to the expected {@link Sender} type and delegates to
      * {@link #execute(CommandSender, String[])}.</p>
+     *
+     * <p>If this command is {@link Confirmable} and not configured to override
+     * confirmation via {@link Confirmable#isPreExecuteConfirmCheck()}, execution is gated on
+     * {@link Confirmable#hasConfirmed(CommandSender)} — the first invocation
+     * prompts for confirmation and is suppressed, and a subsequent invocation
+     * within the confirmation window proceeds.</p>
      *
      * @param commandSender the raw sender supplied by the engine
      * @param args          the command arguments
      */
     default void _Execute(final CommandSender commandSender, final String[] args) {
         if (this.canExecute(commandSender)) {
-            if (this instanceof final Confirmable confirmable && confirmable.isConfirmable(commandSender)) {
-                final ConfirmableService confirmableService = InjectorApi.get(ConfirmableService.class);
-
-                if (!(confirmableService.contains(commandSender, confirmable))) {
-                    confirmableService.put(commandSender, confirmable);
-                    confirmable.sendConfirmationMessage(commandSender);
-                    return;
-                }
-
-                confirmableService.remove(commandSender, confirmable);
+            if (this instanceof final Confirmable confirmable && !(confirmable.isPreExecuteConfirmCheck()) && !(confirmable.hasConfirmed(commandSender))) {
+                return;
             }
 
             this.execute(UtilJava.cast(this.getClassOfCommandSender(), commandSender), args);
