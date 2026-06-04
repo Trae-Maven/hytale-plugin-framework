@@ -5,7 +5,7 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import io.github.trae.hytale.framework.command.BaseSubCommand;
-import io.github.trae.hytale.framework.command.impl.SharedBaseCommand;
+import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
 import io.github.trae.hytale.framework.utility.UtilArgument;
 import io.github.trae.hytale.framework.utility.UtilWorld;
 

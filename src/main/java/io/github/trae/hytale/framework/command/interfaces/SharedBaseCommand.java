@@ -1,8 +1,11 @@
-package io.github.trae.hytale.framework.command.impl;
+package io.github.trae.hytale.framework.command.interfaces;
 
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.console.ConsoleSender;
+import io.github.trae.di.InjectorApi;
+import io.github.trae.hytale.framework.command.impl.Confirmable;
+import io.github.trae.hytale.framework.command.service.ConfirmableService;
 import io.github.trae.hytale.framework.utility.UtilMessage;
 import io.github.trae.utilities.UtilGeneric;
 import io.github.trae.utilities.UtilJava;
@@ -161,6 +164,18 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
      */
     default void _Execute(final CommandSender commandSender, final String[] args) {
         if (this.canExecute(commandSender)) {
+            if (this instanceof final Confirmable confirmable) {
+                final ConfirmableService confirmableService = InjectorApi.get(ConfirmableService.class);
+
+                if (!(confirmableService.contains(commandSender, confirmable))) {
+                    confirmableService.put(commandSender, confirmable);
+                    confirmable.sendConfirmationMessage(commandSender);
+                    return;
+                }
+
+                confirmableService.remove(commandSender, confirmable);
+            }
+
             this.execute(UtilJava.cast(this.getClassOfCommandSender(), commandSender), args);
         }
     }

@@ -5,7 +5,7 @@ import com.hypixel.hytale.server.core.command.system.CommandSender;
 import io.github.trae.hf.Manager;
 import io.github.trae.hf.Module;
 import io.github.trae.hytale.framework.HytalePlugin;
-import io.github.trae.hytale.framework.command.impl.SharedBaseCommand;
+import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
 import io.github.trae.hytale.framework.command.wrappers.AbstractAsyncCommandWrapper;
 import io.github.trae.hytale.framework.command.wrappers.AbstractCommandWrapper;
 import lombok.Getter;

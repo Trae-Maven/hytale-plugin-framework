@@ -8,8 +8,9 @@ import com.hypixel.hytale.server.core.io.adapter.PlayerPacketWatcher;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import io.github.trae.di.InjectorApi;
+import io.github.trae.di.annotations.type.Scan;
 import io.github.trae.hf.Plugin;
-import io.github.trae.hytale.framework.command.impl.SharedBaseCommand;
+import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
 import io.github.trae.hytale.framework.event.EventListener;
 import io.github.trae.hytale.framework.helper.*;
 import io.github.trae.hytale.framework.plugin.events.PluginInitializeEvent;
@@ -60,6 +61,7 @@ import javax.annotation.Nonnull;
  * @see CommandHelper
  */
 @Getter
+@Scan
 public class HytalePlugin extends JavaPlugin implements Plugin {
 
     /**

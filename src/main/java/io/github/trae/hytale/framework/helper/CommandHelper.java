@@ -4,7 +4,7 @@ import com.hypixel.hytale.server.core.command.system.CommandRegistration;
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.command.BaseCommand;
 import io.github.trae.hytale.framework.command.BaseSubCommand;
-import io.github.trae.hytale.framework.command.impl.SharedBaseCommand;
+import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
 import io.github.trae.hytale.framework.helper.abstracts.AbstractHelper;
 import io.github.trae.hytale.framework.helper.interfaces.Processable;
 
