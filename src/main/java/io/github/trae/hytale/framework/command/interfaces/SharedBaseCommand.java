@@ -164,7 +164,7 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
      */
     default void _Execute(final CommandSender commandSender, final String[] args) {
         if (this.canExecute(commandSender)) {
-            if (this instanceof final Confirmable confirmable) {
+            if (this instanceof final Confirmable confirmable && confirmable.isConfirmable(commandSender)) {
                 final ConfirmableService confirmableService = InjectorApi.get(ConfirmableService.class);
 
                 if (!(confirmableService.contains(commandSender, confirmable))) {

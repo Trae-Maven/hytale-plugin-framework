@@ -7,6 +7,10 @@ import java.time.Duration;
 
 public interface Confirmable {
 
+    default boolean isConfirmable(final CommandSender commandSender) {
+        return true;
+    }
+
     default long getExpiration() {
         return Duration.ofMinutes(1).toMillis();
     }
