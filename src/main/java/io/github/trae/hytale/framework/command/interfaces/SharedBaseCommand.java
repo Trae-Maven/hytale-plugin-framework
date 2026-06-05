@@ -5,7 +5,7 @@ import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.console.ConsoleSender;
 import io.github.trae.hytale.framework.command.events.CommandExecuteEvent;
 import io.github.trae.hytale.framework.command.impl.Confirmable;
-import io.github.trae.hytale.framework.command.suggestion.abstracts.AbstractSuggestion;
+import io.github.trae.hytale.framework.command.suggestion.Suggestion;
 import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.hytale.framework.utility.UtilMessage;
 import io.github.trae.utilities.UtilGeneric;
@@ -181,13 +181,13 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
      * order.
      *
      * <p>Defaults to an empty list; override to supply tab-completion and usage
-     * metadata for the command's arguments. Each {@link AbstractSuggestion} is wired
+     * metadata for the command's arguments. Each {@link Suggestion} is wired
      * onto the backing {@link AbstractCommand} via
-     * {@link AbstractSuggestion#CONSUMER}.</p>
+     * {@link Suggestion#CONSUMER}.</p>
      *
      * @return the command's argument suggestions, never {@code null}
      */
-    default List<AbstractSuggestion> getSuggestions() {
+    default List<Suggestion> getSuggestions() {
         return Collections.emptyList();
     }
 }

@@ -6,7 +6,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncC
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import io.github.trae.hytale.framework.command.BaseSubCommand;
 import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
-import io.github.trae.hytale.framework.command.suggestion.abstracts.AbstractSuggestion;
+import io.github.trae.hytale.framework.command.suggestion.Suggestion;
 import io.github.trae.hytale.framework.utility.UtilArgument;
 import io.github.trae.hytale.framework.utility.UtilWorld;
 
@@ -39,7 +39,7 @@ public class AbstractAsyncCommandWrapper extends AbstractAsyncCommand {
 
         this.addAliases(sharedBaseCommand.getAliases().toArray(new String[0]));
 
-        AbstractSuggestion.CONSUMER.accept(sharedBaseCommand, this);
+        Suggestion.CONSUMER.accept(sharedBaseCommand, this);
 
         this.sharedBaseCommand = sharedBaseCommand;
     }

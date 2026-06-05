@@ -4,23 +4,23 @@ import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.ParseResult;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgumentType;
 import com.hypixel.hytale.server.core.command.system.suggestion.SuggestionResult;
-import io.github.trae.hytale.framework.command.suggestion.abstracts.AbstractSuggestion;
+import io.github.trae.hytale.framework.command.suggestion.Suggestion;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Engine {@link ArgumentType} that adapts a framework {@link AbstractSuggestion} into a
+ * Engine {@link ArgumentType} that adapts a framework {@link Suggestion} into a
  * single-token string argument with dynamic tab-completion.
  *
  * <p>Parsing returns the raw entered token verbatim; examples and live suggestions are
- * drawn from the suggestion's {@link AbstractSuggestion#getContentSupplier() content
+ * drawn from the suggestion's {@link Suggestion#getContentSupplier() content
  * supplier}, with suggestions filtered by a case-insensitive prefix match against the
  * text already entered.</p>
  */
 public class ArgumentTypeWrapper extends ArgumentType<String> {
 
-    private final AbstractSuggestion suggestion;
+    private final Suggestion suggestion;
 
     /**
      * Creates a wrapper around the given suggestion.
@@ -30,7 +30,7 @@ public class ArgumentTypeWrapper extends ArgumentType<String> {
      *
      * @param suggestion the suggestion backing this argument type
      */
-    public ArgumentTypeWrapper(final AbstractSuggestion suggestion) {
+    public ArgumentTypeWrapper(final Suggestion suggestion) {
         super(suggestion.getName(), suggestion.getUsage(), 1);
 
         this.suggestion = suggestion;
