@@ -1,6 +1,11 @@
 package io.github.trae.hytale.framework.system.data;
 
-import com.hypixel.hytale.component.*;
+import com.hypixel.hytale.component.ArchetypeChunk;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Component;
+import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import io.github.trae.hytale.framework.system.data.abstracts.AbstractSystemContext;
 import lombok.Getter;
 

@@ -1,6 +1,11 @@
 package io.github.trae.hytale.framework.helper;
 
-import com.hypixel.hytale.event.*;
+import com.hypixel.hytale.event.EventRegistration;
+import com.hypixel.hytale.event.EventRegistry;
+import com.hypixel.hytale.event.IAsyncEvent;
+import com.hypixel.hytale.event.IBaseEvent;
+import com.hypixel.hytale.event.ICancellable;
+import com.hypixel.hytale.event.IEvent;
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.event.EventListener;
 import io.github.trae.hytale.framework.event.annotations.EventHandler;
