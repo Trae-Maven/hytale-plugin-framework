@@ -3,12 +3,16 @@ package io.github.trae.hytale.framework.command.interfaces;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.console.ConsoleSender;
+import io.github.trae.hytale.framework.command.events.CommandExecuteEvent;
 import io.github.trae.hytale.framework.command.impl.Confirmable;
+import io.github.trae.hytale.framework.command.suggestion.abstracts.AbstractSuggestion;
+import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.hytale.framework.utility.UtilMessage;
 import io.github.trae.utilities.UtilGeneric;
 import io.github.trae.utilities.UtilJava;
 import io.github.trae.utilities.UtilString;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -120,29 +124,6 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
     }
 
     /**
-     * Performs pre-execution validation for the given sender.
-     *
-     * <p>Verifies that the sender matches the expected {@link Sender} type and holds the
-     * required permission, messaging the sender on failure.</p>
-     *
-     * @param sender the sender attempting to execute the command
-     * @return {@code true} if execution may proceed, {@code false} otherwise
-     */
-    default boolean canExecute(final CommandSender sender) {
-        if (!(this.getClassOfCommandSender().isInstance(sender))) {
-            UtilMessage.message(sender, "Command", "Invalid Command Sender!");
-            return false;
-        }
-
-        if (!(this.hasPermission(sender))) {
-            UtilMessage.message(sender, "Command", "You do not have permission to execute this command!");
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Executes the command logic for a validated, correctly-typed sender.
      *
      * @param sender the command sender, guaranteed to be of type {@link Sender}
@@ -153,26 +134,60 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
     /**
      * Internal dispatch entry point invoked by the engine command wrappers.
      *
-     * <p>Runs {@link #canExecute(CommandSender)} validation and, on success,
-     * casts the sender to the expected {@link Sender} type and delegates to
-     * {@link #execute(CommandSender, String[])}.</p>
+     * <p>Validates the invocation in order before delegating to the typed
+     * {@link #execute(CommandSender, String[])} logic:</p>
+     * <ol>
+     *     <li>Rejects the sender if it is not an instance of the resolved
+     *     {@link Sender} type (see {@link #getClassOfCommandSender()}).</li>
+     *     <li>Rejects the sender if it fails {@link #hasPermission(CommandSender)}.</li>
+     *     <li>Aborts if the dispatched {@link CommandExecuteEvent} is cancelled.</li>
+     *     <li>If this command is {@link Confirmable} with
+     *     {@link Confirmable#isPreExecuteConfirmCheck()} enabled, gates execution on
+     *     {@link Confirmable#hasConfirmed(CommandSender)} — the first invocation
+     *     prompts for confirmation and is suppressed, and a subsequent invocation
+     *     within the confirmation window proceeds.</li>
+     * </ol>
      *
-     * <p>If this command is {@link Confirmable} and not configured to override
-     * confirmation via {@link Confirmable#isPreExecuteConfirmCheck()}, execution is gated on
-     * {@link Confirmable#hasConfirmed(CommandSender)} — the first invocation
-     * prompts for confirmation and is suppressed, and a subsequent invocation
-     * within the confirmation window proceeds.</p>
+     * <p>On success the sender is cast to the expected {@link Sender} type and
+     * {@link #execute(CommandSender, String[])} is invoked.</p>
      *
      * @param commandSender the raw sender supplied by the engine
      * @param args          the command arguments
      */
     default void _Execute(final CommandSender commandSender, final String[] args) {
-        if (this.canExecute(commandSender)) {
-            if (this instanceof final Confirmable confirmable && confirmable.isPreExecuteConfirmCheck() && !(confirmable.hasConfirmed(commandSender))) {
-                return;
-            }
-
-            this.execute(UtilJava.cast(this.getClassOfCommandSender(), commandSender), args);
+        if (!(this.getClassOfCommandSender().isInstance(commandSender))) {
+            UtilMessage.message(commandSender, "Command", "Invalid Command Sender!");
+            return;
         }
+
+        if (!(this.hasPermission(commandSender))) {
+            UtilMessage.message(commandSender, "Command", "You do not have permission to execute this command!");
+            return;
+        }
+
+        if (UtilEvent.supply(new CommandExecuteEvent(this, commandSender, args)).isCancelled()) {
+            return;
+        }
+
+        if (this instanceof final Confirmable confirmable && confirmable.isPreExecuteConfirmCheck() && !(confirmable.hasConfirmed(commandSender))) {
+            return;
+        }
+
+        this.execute(UtilJava.cast(this.getClassOfCommandSender(), commandSender), args);
+    }
+
+    /**
+     * Returns the argument suggestions to register for this command, in declaration
+     * order.
+     *
+     * <p>Defaults to an empty list; override to supply tab-completion and usage
+     * metadata for the command's arguments. Each {@link AbstractSuggestion} is wired
+     * onto the backing {@link AbstractCommand} via
+     * {@link AbstractSuggestion#CONSUMER}.</p>
+     *
+     * @return the command's argument suggestions, never {@code null}
+     */
+    default List<AbstractSuggestion> getSuggestions() {
+        return Collections.emptyList();
     }
 }
