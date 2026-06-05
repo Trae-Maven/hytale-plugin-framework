@@ -1,6 +1,7 @@
 package io.github.trae.hytale.framework.command.suggestion;
 
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
+import com.hypixel.hytale.server.core.command.system.CommandSender;
 import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
 import io.github.trae.hytale.framework.command.wrappers.ArgumentTypeWrapper;
 import io.github.trae.utilities.objects.consumer.BiConsumer;
@@ -8,15 +9,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Describes a single command argument suggestion, pairing display metadata with a
- * dynamic supplier of candidate completion values.
+ * sender-aware supplier of candidate completion values.
  *
  * <p>Each suggestion declares its {@link #usage} placeholder, a human-readable
- * {@link #name} and {@link #description}, and a {@link #contentSupplier} that produces
- * the current list of completion candidates on demand.</p>
+ * {@link #name} and {@link #description}, and a {@link #contentFunction} that produces
+ * the current list of completion candidates for a given {@link CommandSender} on
+ * demand.</p>
  */
 @AllArgsConstructor
 @Getter
@@ -52,7 +54,7 @@ public class Suggestion {
     private final String description;
 
     /**
-     * Supplies the current list of completion candidates on demand.
+     * Produces the list of completion candidates for the requesting {@link CommandSender}.
      */
-    private final Supplier<List<String>> contentSupplier;
+    private final Function<CommandSender, List<String>> contentFunction;
 }

@@ -13,10 +13,10 @@ import javax.annotation.Nullable;
  * Engine {@link ArgumentType} that adapts a framework {@link Suggestion} into a
  * single-token string argument with dynamic tab-completion.
  *
- * <p>Parsing returns the raw entered token verbatim; examples and live suggestions are
- * drawn from the suggestion's {@link Suggestion#getContentSupplier() content
- * supplier}, with suggestions filtered by a case-insensitive prefix match against the
- * text already entered.</p>
+ * <p>Parsing returns the raw entered token verbatim; live suggestions are produced by
+ * applying the suggestion's {@link Suggestion#getContentFunction() content function}
+ * to the requesting sender, then filtered by a case-insensitive prefix match against
+ * the text already entered.</p>
  */
 public class ArgumentTypeWrapper extends ArgumentType<String> {
 
@@ -37,17 +37,6 @@ public class ArgumentTypeWrapper extends ArgumentType<String> {
     }
 
     /**
-     * Returns up to five example values drawn from the suggestion's content supplier.
-     *
-     * @return an array of example completion values, capped at five
-     */
-    @Nonnull
-    @Override
-    public String[] getExamples() {
-        return this.suggestion.getContentSupplier().get().stream().limit(5).toArray(String[]::new);
-    }
-
-    /**
      * Parses the argument by returning the first (and only) input token unchanged.
      *
      * @param input       the token(s) supplied for this argument
@@ -61,17 +50,18 @@ public class ArgumentTypeWrapper extends ArgumentType<String> {
     }
 
     /**
-     * Offers tab-completions from the suggestion's content supplier, keeping only
-     * candidates whose prefix matches the already-entered text case-insensitively.
+     * Offers tab-completions by applying the suggestion's content function to the
+     * requesting sender, keeping only candidates whose prefix matches the already-entered
+     * text case-insensitively.
      *
-     * @param sender             the sender requesting suggestions
+     * @param sender             the sender requesting suggestions, passed to the content function
      * @param textAlreadyEntered the partial text typed so far for this argument
      * @param numParametersTyped the number of parameters typed so far
      * @param result             the suggestion result accumulator to populate
      */
     @Override
     public void suggest(@Nonnull final CommandSender sender, @Nonnull final String textAlreadyEntered, final int numParametersTyped, @Nonnull final SuggestionResult result) {
-        for (final String string : this.suggestion.getContentSupplier().get()) {
+        for (final String string : this.suggestion.getContentFunction().apply(sender)) {
             if (!(string.regionMatches(true, 0, textAlreadyEntered, 0, Math.min(string.length(), textAlreadyEntered.length())))) {
                 continue;
             }
