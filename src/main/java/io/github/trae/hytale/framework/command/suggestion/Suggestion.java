@@ -1,10 +1,6 @@
 package io.github.trae.hytale.framework.command.suggestion;
 
-import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
-import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
-import io.github.trae.hytale.framework.command.wrappers.ArgumentTypeWrapper;
-import io.github.trae.utilities.objects.consumer.BiConsumer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,31 +8,20 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Describes a single command argument suggestion, pairing display metadata with a
- * sender-aware supplier of candidate completion values.
+ * Declares a single positional argument slot's tab-completion behavior.
  *
- * <p>Each suggestion declares its {@link #usage} placeholder, a human-readable
- * {@link #name} and {@link #description}, and a {@link #contentFunction} that produces
- * the current list of completion candidates for a given {@link CommandSender} on
- * demand.</p>
+ * <p>Each suggestion describes one positional slot: its {@link #usage} placeholder
+ * (rendered as {@code <usage>} in command syntax), a human-readable {@link #name} and
+ * {@link #description}, and a {@link #contentFunction} that produces the live completion
+ * candidates for the requesting {@link CommandSender}.</p>
+ *
+ * <p>The framework reads a command's ordered suggestion list and auto-generates one
+ * engine usage variant per argument count, declaring the corresponding slots as required
+ * arguments so the client requests completions for them on TAB.</p>
  */
 @AllArgsConstructor
 @Getter
 public class Suggestion {
-
-    /**
-     * Registers every suggestion declared by a {@link SharedBaseCommand} onto its backing
-     * {@link AbstractCommand}, wiring each through an {@link ArgumentTypeWrapper}.
-     *
-     * <p>Each suggestion is added as an optional argument via
-     * {@link AbstractCommand#withOptionalArg(String, String, com.hypixel.hytale.server.core.command.system.arguments.types.ArgumentType)},
-     * using its {@link #getUsage() usage} placeholder and {@link #getDescription() description}.</p>
-     */
-    public static final BiConsumer<SharedBaseCommand<?>, AbstractCommand> CONSUMER = (sharedBaseCommand, abstractCommand) -> {
-        for (final Suggestion suggestion : sharedBaseCommand.getSuggestions()) {
-            abstractCommand.withOptionalArg(suggestion.getUsage(), suggestion.getDescription(), new ArgumentTypeWrapper(suggestion));
-        }
-    };
 
     /**
      * The human-readable display name of the argument (e.g. {@code "Player Name"}).
@@ -44,7 +29,7 @@ public class Suggestion {
     private final String name;
 
     /**
-     * The usage placeholder shown in command syntax (e.g. {@code "playerName"}).
+     * The usage placeholder shown in command syntax (e.g. {@code "player"}).
      */
     private final String usage;
 
@@ -54,7 +39,7 @@ public class Suggestion {
     private final String description;
 
     /**
-     * Produces the list of completion candidates for the requesting {@link CommandSender}.
+     * Produces the live list of completion candidates for the requesting sender.
      */
     private final Function<CommandSender, List<String>> contentFunction;
 }

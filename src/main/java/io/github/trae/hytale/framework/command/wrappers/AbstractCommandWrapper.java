@@ -12,6 +12,8 @@ import io.github.trae.hytale.framework.utility.UtilWorld;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -41,9 +43,23 @@ public class AbstractCommandWrapper extends AbstractCommand {
 
         this.addAliases(sharedBaseCommand.getAliases().toArray(new String[0]));
 
-        Suggestion.CONSUMER.accept(sharedBaseCommand, this);
-
         this.sharedBaseCommand = sharedBaseCommand;
+
+        // Build one shared argument-type wrapper per declared suggestion slot, so each
+        // slot is registered under a single stable suggestion type id rather than a fresh
+        // one per variant. Then auto-generate one variant per argument count, each reusing
+        // the shared wrappers for its leading slots. The parent (this) stays 0-arg, so a
+        // bare invocation routes here for the command's own "missing argument" handling.
+        final List<Suggestion> suggestions = sharedBaseCommand.getSuggestions();
+        final List<ArgumentTypeWrapper> sharedWrappers = new ArrayList<>(suggestions.size());
+
+        for (final Suggestion suggestion : suggestions) {
+            sharedWrappers.add(new ArgumentTypeWrapper(this.sharedBaseCommand, suggestion));
+        }
+
+        for (int argCount = 1; argCount <= suggestions.size(); argCount++) {
+            this.addUsageVariant(new VariantCommandWrapper(sharedBaseCommand, sharedWrappers, argCount));
+        }
     }
 
     /**

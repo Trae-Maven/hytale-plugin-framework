@@ -177,15 +177,15 @@ public interface SharedBaseCommand<Sender extends CommandSender> {
     }
 
     /**
-     * Returns the argument suggestions to register for this command, in declaration
-     * order.
+     * Returns the ordered positional argument suggestions for this command.
      *
-     * <p>Defaults to an empty list; override to supply tab-completion and usage
-     * metadata for the command's arguments. Each {@link Suggestion} is wired
-     * onto the backing {@link AbstractCommand} via
-     * {@link Suggestion#CONSUMER}.</p>
+     * <p>Defaults to an empty list. Override to declare positional slots: the slot at
+     * index {@code i} corresponds to {@code args[i]} in {@link #execute(CommandSender, String[])}.
+     * The framework auto-generates one engine usage variant per argument count so the
+     * client requests completions for each slot on TAB, while execution always receives
+     * the raw {@code String[]} for the command's own argument-count handling.</p>
      *
-     * @return the command's argument suggestions, never {@code null}
+     * @return the ordered positional suggestions, never {@code null}
      */
     default List<Suggestion> getSuggestions() {
         return Collections.emptyList();
