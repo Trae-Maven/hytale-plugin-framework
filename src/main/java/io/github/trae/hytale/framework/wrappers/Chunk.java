@@ -145,12 +145,12 @@ public class Chunk implements IChunk {
      */
     @Override
     public List<BlockLocation> getOutlineHighestBlockLocations() {
-        final WorldChunk worldChunk = this.getWorld().getChunkIfLoaded(ChunkUtil.indexChunk(this.getX(), this.getZ()));
-        if (worldChunk == null) {
-            return List.of();
-        }
-
         return UtilJava.createCollection(new ArrayList<>(), list -> {
+            final WorldChunk worldChunk = this.getWorld().getChunkIfLoaded(ChunkUtil.indexChunk(this.getX(), this.getZ()));
+            if (worldChunk == null) {
+                return;
+            }
+
             final int minBlockX = this.getX() << SHIFT;
             final int minBlockZ = this.getZ() << SHIFT;
 
