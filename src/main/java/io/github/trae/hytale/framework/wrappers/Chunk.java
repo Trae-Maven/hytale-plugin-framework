@@ -71,6 +71,70 @@ public class Chunk implements IChunk {
     }
 
     /**
+     * Returns the outline block locations forming the outer perimeter of the entire region
+     * spanned by the given chunks, each at its highest block Y. Computes the bounding rectangle
+     * of all chunks and traces a single terrain-following border around the whole area, rather
+     * than outlining each chunk individually.
+     *
+     * @param chunkList the chunks whose combined region is outlined; assumed contiguous and in one world
+     * @return the outer outline block locations at their respective highest Y, or an empty list if empty or unloaded
+     */
+    public static List<BlockLocation> getTotalOutlineOfAllChunks(final List<Chunk> chunkList) {
+        return UtilJava.createCollection(new ArrayList<>(), list -> {
+            if (chunkList.isEmpty()) {
+                return;
+            }
+
+            final World world = chunkList.getFirst().getWorld();
+            if (world == null) {
+                return;
+            }
+
+            int minChunkX = Integer.MAX_VALUE;
+            int minChunkZ = Integer.MAX_VALUE;
+            int maxChunkX = Integer.MIN_VALUE;
+            int maxChunkZ = Integer.MIN_VALUE;
+
+            for (final Chunk chunk : chunkList) {
+                minChunkX = Math.min(minChunkX, chunk.getX());
+                minChunkZ = Math.min(minChunkZ, chunk.getZ());
+                maxChunkX = Math.max(maxChunkX, chunk.getX());
+                maxChunkZ = Math.max(maxChunkZ, chunk.getZ());
+            }
+
+            final int minBlockX = minChunkX << SHIFT;
+            final int minBlockZ = minChunkZ << SHIFT;
+
+            final int maxBlockX = (maxChunkX << SHIFT) + WIDTH - 1;
+            final int maxBlockZ = (maxChunkZ << SHIFT) + DEPTH - 1;
+
+            for (int blockX = minBlockX; blockX <= maxBlockX; blockX++) {
+                final WorldChunk northWorldChunk = world.getChunkIfLoaded(ChunkUtil.indexChunk(blockX >> SHIFT, minBlockZ >> SHIFT));
+                if (northWorldChunk != null) {
+                    list.add(new BlockLocation(world.getName(), blockX, northWorldChunk.getHeight(blockX & MASK, 0), minBlockZ));
+                }
+
+                final WorldChunk southWorldChunk = world.getChunkIfLoaded(ChunkUtil.indexChunk(blockX >> SHIFT, maxBlockZ >> SHIFT));
+                if (southWorldChunk != null) {
+                    list.add(new BlockLocation(world.getName(), blockX, southWorldChunk.getHeight(blockX & MASK, MASK), maxBlockZ));
+                }
+            }
+
+            for (int blockZ = minBlockZ + 1; blockZ < maxBlockZ; blockZ++) {
+                final WorldChunk westWorldChunk = world.getChunkIfLoaded(ChunkUtil.indexChunk(minBlockX >> SHIFT, blockZ >> SHIFT));
+                if (westWorldChunk != null) {
+                    list.add(new BlockLocation(world.getName(), minBlockX, westWorldChunk.getHeight(0, blockZ & MASK), blockZ));
+                }
+
+                final WorldChunk eastWorldChunk = world.getChunkIfLoaded(ChunkUtil.indexChunk(maxBlockX >> SHIFT, blockZ >> SHIFT));
+                if (eastWorldChunk != null) {
+                    list.add(new BlockLocation(world.getName(), maxBlockX, eastWorldChunk.getHeight(MASK, blockZ & MASK), blockZ));
+                }
+            }
+        });
+    }
+
+    /**
      * Returns the world this chunk belongs to.
      * Lazily resolves and caches the World instance from the world name.
      */
