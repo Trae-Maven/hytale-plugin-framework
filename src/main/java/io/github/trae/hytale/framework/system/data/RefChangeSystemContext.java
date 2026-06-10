@@ -18,13 +18,14 @@ import javax.annotation.Nullable;
  * the backing store, and the command buffer for deferred mutations.</p>
  *
  * <p>For {@link io.github.trae.hytale.framework.system.enums.RefChangeType#SET} handlers,
- * both {@link #getOldComponent()} and {@link #getNewComponent()} are populated.
+ * both {@link #oldComponent} and {@link #newComponent} are populated.
  * For {@link io.github.trae.hytale.framework.system.enums.RefChangeType#ADDED} handlers,
- * only {@link #getComponent()} is populated (the added component).
+ * only {@link #component} is populated (the added component).
  * For {@link io.github.trae.hytale.framework.system.enums.RefChangeType#REMOVED} handlers,
- * only {@link #getComponent()} is populated (the removed component).</p>
+ * only {@link #component} is populated (the removed component).</p>
  *
- * @param <T> the component type
+ * @param <ECS_TYPE> the ECS backing type
+ * @param <T>        the component type
  */
 @Getter
 public class RefChangeSystemContext<ECS_TYPE, T extends Component<ECS_TYPE>> extends AbstractSystemContext<ECS_TYPE> {
@@ -40,7 +41,7 @@ public class RefChangeSystemContext<ECS_TYPE, T extends Component<ECS_TYPE>> ext
      *
      * <p>For {@code ADDED}, this is the new component.
      * For {@code REMOVED}, this is the removed component.
-     * For {@code SET}, this is the new component (same as {@link #getNewComponent()}).</p>
+     * For {@code SET}, this is the new component (same as {@link #newComponent}).</p>
      */
     @Nonnull
     private final T component;

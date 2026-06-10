@@ -23,7 +23,7 @@ import java.util.List;
  * <p>Tags are nestable. Closing a color tag resets to the provided reset color.
  * Unrecognized tags are rendered as literal text.</p>
  *
- * <h3>Example usage:</h3>
+ * <h2>Example usage:</h2>
  * <pre>{@code
  * Message msg = MessageParser.parse("<bold><red>Warning:</red></bold> Server restarting in <gold>5</gold> seconds.");
  * Message msg = MessageParser.parse("<#00FF00>Custom hex color</#00FF00>");

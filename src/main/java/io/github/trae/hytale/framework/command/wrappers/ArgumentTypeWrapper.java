@@ -20,9 +20,8 @@ import java.util.Locale;
  *
  * <p>Parsing returns the raw entered token verbatim — the framework reads the raw
  * {@code String[]} in its own execution logic, so the parsed value is never consumed.
- * Completions are produced by applying the suggestion's
- * {@link Suggestion#getContentFunction() content function} to the requesting sender,
- * filtered case-insensitively by the partial text already entered.</p>
+ * Completions are produced by applying the suggestion's content function to the
+ * requesting sender, filtered case-insensitively by the partial text already entered.</p>
  *
  * <p>This {@code suggest} method is invoked server-side by the engine when the client
  * sends an {@code ArgValuesRequest} for this argument's suggestion type id. A single
@@ -38,7 +37,8 @@ public class ArgumentTypeWrapper extends ArgumentType<String> {
     /**
      * Creates a wrapper around the given suggestion, consuming a single token.
      *
-     * @param suggestion the suggestion backing this argument type
+     * @param sharedBaseCommand the command this argument belongs to
+     * @param suggestion        the suggestion backing this argument type
      */
     public ArgumentTypeWrapper(final SharedBaseCommand<?> sharedBaseCommand, final Suggestion suggestion) {
         super(suggestion.getName(), suggestion.getUsage(), 1);

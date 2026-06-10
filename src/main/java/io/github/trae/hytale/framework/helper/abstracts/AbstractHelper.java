@@ -2,6 +2,7 @@ package io.github.trae.hytale.framework.helper.abstracts;
 
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.helper.EventHelper;
+import io.github.trae.hytale.framework.helper.SystemHelper;
 import io.github.trae.hytale.framework.helper.abstracts.interfaces.IAbstractHelper;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ import lombok.Getter;
  * @see EventHelper
  * @see io.github.trae.hytale.framework.helper.PacketWatcherHelper
  * @see io.github.trae.hytale.framework.helper.PlayerPacketWatcherHelper
- * @see OldSystemHelper
+ * @see SystemHelper
  */
 @AllArgsConstructor
 public abstract class AbstractHelper<Type> implements IAbstractHelper<Type> {
