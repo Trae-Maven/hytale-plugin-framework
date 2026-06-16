@@ -75,7 +75,7 @@ public class UtilMessage {
             return Message.empty();
         }
 
-        return Message.raw(getPrefixFormat().formatted(prefix)).color(color);
+        return Message.raw(prefixFormat.formatted(prefix)).color(color);
     }
 
     /**
@@ -85,7 +85,7 @@ public class UtilMessage {
      * @return the formatted prefix message
      */
     public static Message resolvePrefix(final String prefix) {
-        return resolvePrefix(getPrefixColor(), prefix);
+        return resolvePrefix(prefixColor, prefix);
     }
 
     // -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ public class UtilMessage {
      * @param message         the raw markup string
      */
     public static void message(final IMessageReceiver messageReceiver, final String message) {
-        message(messageReceiver, MessageParser.parse(message, getResetColor()));
+        message(messageReceiver, MessageParser.parse(message, resetColor));
     }
 
     /**
@@ -136,7 +136,7 @@ public class UtilMessage {
      * @param message         the raw markup string
      */
     public static void message(final IMessageReceiver messageReceiver, final String prefix, final String message) {
-        message(messageReceiver, prefix, MessageParser.parse(message, prefix == null ? getResetColor() : getMessageColor()));
+        message(messageReceiver, prefix, MessageParser.parse(message, prefix == null ? resetColor : messageColor));
     }
 
     // -----------------------------------------------------------------------
@@ -170,7 +170,7 @@ public class UtilMessage {
      * @param ignored          UUIDs to skip, or {@code null} to send to all
      */
     public static <MessageReceiver extends IMessageReceiver> void message(final Collection<MessageReceiver> messageReceivers, final String prefix, final String message, final List<UUID> ignored) {
-        message(messageReceivers, prefix, MessageParser.parse(message, getResetColor()), ignored);
+        message(messageReceivers, prefix, MessageParser.parse(message, resetColor), ignored);
     }
 
     // -----------------------------------------------------------------------
@@ -195,7 +195,7 @@ public class UtilMessage {
      * Parses and broadcasts a markup string to all players, optionally ignoring specific UUIDs.
      */
     public static void broadcast(final String message, final List<UUID> ignored) {
-        broadcast(MessageParser.parse(message, getResetColor()), ignored);
+        broadcast(MessageParser.parse(message, resetColor), ignored);
     }
 
     /**
@@ -223,7 +223,7 @@ public class UtilMessage {
      * Parses and broadcasts a prefixed markup string to all players, optionally ignoring specific UUIDs.
      */
     public static void broadcast(final String prefix, final String message, final List<UUID> ignored) {
-        broadcast(prefix, MessageParser.parse(message, prefix == null ? getResetColor() : getMessageColor()), ignored);
+        broadcast(prefix, MessageParser.parse(message, prefix == null ? resetColor : messageColor), ignored);
     }
 
     /**
@@ -248,7 +248,7 @@ public class UtilMessage {
      * Parses a markup string and sends it to the server console.
      */
     public static void log(final String message) {
-        log(MessageParser.parse(message, getResetColor()));
+        log(MessageParser.parse(message, resetColor));
     }
 
     /**
@@ -262,6 +262,6 @@ public class UtilMessage {
      * Parses a markup string and sends it with a prefix to the server console.
      */
     public static void log(final String prefix, final String message) {
-        log(prefix, MessageParser.parse(message, prefix == null ? getResetColor() : getMessageColor()));
+        log(prefix, MessageParser.parse(message, prefix == null ? resetColor : messageColor));
     }
 }
