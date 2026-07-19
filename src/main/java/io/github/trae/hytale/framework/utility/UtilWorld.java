@@ -37,6 +37,7 @@ public class UtilWorld {
      */
     public static Optional<World> searchWorld(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<World> predicate) {
         return UtilSearch.search(
+                World.class,
                 Universe.get().getWorlds().values(),
                 predicate,
                 world -> world.getName().equalsIgnoreCase(name),

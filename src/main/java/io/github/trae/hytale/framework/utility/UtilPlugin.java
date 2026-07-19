@@ -174,6 +174,7 @@ public class UtilPlugin {
      */
     public static Optional<PluginBase> searchExternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<PluginBase> predicate) {
         return UtilSearch.search(
+                PluginBase.class,
                 getPlugins(),
                 predicate,
                 pluginBase -> pluginBase.getIdentifier().toString().equalsIgnoreCase(name),
@@ -223,6 +224,7 @@ public class UtilPlugin {
      */
     public static Optional<HytalePlugin> searchInternalPlugin(final IMessageReceiver messageReceiver, final String name, final boolean inform, final Predicate<HytalePlugin> predicate) {
         return UtilSearch.search(
+                HytalePlugin.class,
                 getInternalPlugins(),
                 predicate,
                 hytalePlugin -> hytalePlugin.getPluginName().equalsIgnoreCase(name),

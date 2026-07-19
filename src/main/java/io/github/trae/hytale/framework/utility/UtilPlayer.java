@@ -100,6 +100,7 @@ public class UtilPlayer {
      */
     public static Optional<PlayerRef> searchPlayerRef(final IMessageReceiver messageReceiver, final String input, final boolean inform, final Predicate<PlayerRef> predicate) {
         return UtilSearch.search(
+                PlayerRef.class,
                 Universe.get().getPlayers(),
                 predicate,
                 playerRef -> playerRef.getUsername().equalsIgnoreCase(input),
