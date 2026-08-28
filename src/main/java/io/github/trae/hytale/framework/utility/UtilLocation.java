@@ -14,7 +14,7 @@ import io.github.trae.hytale.framework.wrappers.Location;
 import io.github.trae.utilities.UtilNumber;
 import lombok.experimental.UtilityClass;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.UUID;
 
 @UtilityClass

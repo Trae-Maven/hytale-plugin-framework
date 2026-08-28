@@ -51,7 +51,7 @@ import javax.annotation.Nonnull;
  *   <li>{@link SharedBaseCommand} as {@link io.github.trae.hytale.framework.command.BaseCommand} —
  *       queued for registration with the command system via {@link CommandHelper}</li>
  *   <li>{@link SharedBaseCommand} as {@link io.github.trae.hytale.framework.command.BaseSubCommand} —
- *       attached to its parent command as a subcommand via {@link CommandHelper}</li>
+ *       attached to its parent command via {@link CommandHelper}</li>
  * </ul>
  *
  * <p>Commands use a two-phase registration: they are queued during component
@@ -107,6 +107,13 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
 
     /**
      * Creates a new {@link HytalePlugin} and initializes all framework helpers.
+     *
+     * <p>Installs the plugin's logger, registers its data directory as the configuration
+     * directory for {@link io.github.trae.di.configuration.annotations.Configuration @Configuration}
+     * file resolution, and sets up the executors used to dispatch
+     * {@link io.github.trae.di.annotations.method.Scheduler @Scheduler} tasks via
+     * {@link UtilTask}. The scheduled executor is only installed if one has not already
+     * been set, so the first plugin loaded supplies it for every plugin sharing the container.</p>
      *
      * @param javaPluginInit the Hytale-provided plugin initialization context
      */
@@ -167,17 +174,20 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     /**
      * Lifecycle callback invoked when a hierarchy component is initialized.
      *
-     * <p>Routes the component to the appropriate helper based on its type:</p>
+     * <p>Delegates to {@link Plugin#onComponentInitialize(Object)} to invoke
+     * {@link io.github.trae.hf.Frame#initializeFrame()} first, so a command's backing
+     * engine wrapper exists before the helper reads it, then routes the component to
+     * the appropriate helper based on its type:</p>
      * <ul>
      *   <li>{@link EventListener} — registered with the event bus</li>
      *   <li>{@link SystemListener} — registered with the ECS store registry</li>
+     *   <li>{@link SharedBaseCommand} (a {@code BaseCommand}) — queued as a root command</li>
+     *   <li>{@link SharedBaseCommand} (a {@code BaseSubCommand}) — attached to its parent
+     *       command as a subcommand</li>
      *   <li>{@link PacketWatcher} — registered with the packet pipeline</li>
      *   <li>{@link PlayerPacketWatcher} — registered with the packet pipeline</li>
      *   <li>{@link PacketFilter} — registered with the packet pipeline</li>
      *   <li>{@link PlayerPacketFilter} — registered with the packet pipeline</li>
-     *   <li>{@link SharedBaseCommand} (a {@code BaseCommand}) — queued as a root command</li>
-     *   <li>{@link SharedBaseCommand} (a {@code BaseSubCommand}) — attached to the parent
-     *       module's command as a subcommand</li>
      * </ul>
      *
      * @param instance the component instance being initialized
@@ -218,17 +228,20 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     /**
      * Lifecycle callback invoked when a hierarchy component is shut down.
      *
-     * <p>Reverses the registrations performed in {@link #onComponentInitialize(Object)}:</p>
+     * <p>Reverses the registrations performed in {@link #onComponentInitialize(Object)},
+     * then delegates to {@link Plugin#onComponentShutdown(Object)} to invoke
+     * {@link io.github.trae.hf.Frame#shutdownFrame()}, so the hook runs with the
+     * component still attached:</p>
      * <ul>
      *   <li>{@link EventListener} — unregistered from the event bus</li>
      *   <li>{@link SystemListener} — unregistered from the ECS store registry</li>
+     *   <li>{@link SharedBaseCommand} (a {@code BaseCommand}) — unregistered from the command system</li>
+     *   <li>{@link SharedBaseCommand} (a {@code BaseSubCommand}) — removed from the parent command's
+     *       subcommand map</li>
      *   <li>{@link PacketWatcher} — unregistered from the packet pipeline</li>
      *   <li>{@link PlayerPacketWatcher} — unregistered from the packet pipeline</li>
      *   <li>{@link PacketFilter} — unregistered from the packet pipeline</li>
      *   <li>{@link PlayerPacketFilter} — unregistered from the packet pipeline</li>
-     *   <li>{@link SharedBaseCommand} (a {@code BaseCommand}) — unregistered from the command system</li>
-     *   <li>{@link SharedBaseCommand} (a {@code BaseSubCommand}) — removed from the parent command's
-     *       subcommand map</li>
      * </ul>
      *
      * @param instance the component instance being shut down

@@ -3,7 +3,7 @@ package io.github.trae.hytale.framework.command;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import io.github.trae.hf.Manager;
-import io.github.trae.hf.Module;
+import io.github.trae.hf.Node;
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
 import io.github.trae.hytale.framework.command.wrappers.AbstractAsyncCommandWrapper;
@@ -17,11 +17,11 @@ import java.util.List;
 /**
  * Base class for top-level framework commands.
  *
- * <p>A {@code BaseCommand} is both a {@link Module} (participating in the plugin's
- * manager/module lifecycle) and a {@link SharedBaseCommand} (carrying the shared
- * command contract). The backing engine wrapper —
- * {@link AbstractAsyncCommandWrapper} or {@link AbstractCommandWrapper}, chosen by
- * {@link #isAsynchronous()} — is built lazily in {@link #initializeFrame()} and
+ * <p>A {@code BaseCommand} is both a {@link Node} (sitting beneath its owning
+ * {@link Manager} in the hierarchy, which it resolves through {@link Node#getParent()})
+ * and a {@link SharedBaseCommand} (carrying the shared command contract). The backing
+ * engine wrapper — {@link AbstractAsyncCommandWrapper} or {@link AbstractCommandWrapper},
+ * chosen by {@link #isAsynchronous()} — is built lazily in {@link #initializeFrame()} and
  * released in {@link #shutdownFrame()}, rather than at construction time.</p>
  *
  * <p>Deferring wrapper creation until {@link #initializeFrame()} ensures all fields
@@ -35,7 +35,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public abstract class BaseCommand<BasePlugin extends HytalePlugin, BaseManager extends Manager<BasePlugin>, Sender extends CommandSender> implements Module<BasePlugin, BaseManager>, SharedBaseCommand<Sender> {
+public abstract class BaseCommand<BasePlugin extends HytalePlugin, BaseManager extends Manager<BasePlugin>, Sender extends CommandSender> implements Node<BasePlugin, BaseManager>, SharedBaseCommand<Sender> {
 
     /**
      * The command's primary label and human-readable description.
@@ -59,6 +59,9 @@ public abstract class BaseCommand<BasePlugin extends HytalePlugin, BaseManager e
 
     /**
      * Creates a command with the given label, description, and permission.
+     *
+     * <p>Aliases start empty and may be populated before {@link #initializeFrame()}
+     * builds the wrapper that reads them.</p>
      *
      * @param label       the primary command label
      * @param description the human-readable description
@@ -87,6 +90,10 @@ public abstract class BaseCommand<BasePlugin extends HytalePlugin, BaseManager e
      * <p>Selects {@link AbstractAsyncCommandWrapper} or {@link AbstractCommandWrapper}
      * based on {@link #isAsynchronous()}. Idempotent — a no-op if the wrapper already
      * exists.</p>
+     *
+     * <p>Runs before this command is handed to the plugin's command helper, and before
+     * any subcommand beneath it is initialized, so the wrapper is always available when
+     * a subcommand attaches itself.</p>
      */
     @Override
     public void initializeFrame() {

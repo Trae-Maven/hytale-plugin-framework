@@ -4,7 +4,7 @@ import com.hypixel.hytale.server.core.Message;
 import io.github.trae.hytale.framework.utility.enums.ChatColor;
 import lombok.experimental.UtilityClass;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 

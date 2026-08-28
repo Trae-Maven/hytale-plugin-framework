@@ -10,7 +10,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hytale.framework.wrappers.Chunk;
 import lombok.experimental.UtilityClass;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.UUID;
 
 @UtilityClass

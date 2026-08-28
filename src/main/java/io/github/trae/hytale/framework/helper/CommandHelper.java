@@ -24,8 +24,9 @@ import java.util.Optional;
  * when {@link #process()} is invoked. This two-phase approach allows all commands to
  * be declared during plugin initialization and registered in a single pass.</p>
  *
- * <p>Sub-commands are attached directly to their parent module's command at
- * registration time and are not tracked for bulk processing.</p>
+ * <p>Sub-commands are attached directly to their parent command at registration time and
+ * are not tracked for bulk processing. The hierarchy initializes a parent before the
+ * sub-commands beneath it, so the parent's engine wrapper always exists by then.</p>
  *
  * <p>Each parent command is tracked alongside its {@link CommandRegistration}, enabling
  * clean unregistration via {@link #unregister(SharedBaseCommand)}.</p>
@@ -93,7 +94,7 @@ public class CommandHelper extends AbstractHelper<SharedBaseCommand<?>> implemen
      * with a {@code null} handle, to be processed later by {@link #process()}.</p>
      *
      * <p>If the command is a {@link BaseSubCommand}, it is immediately attached to its
-     * parent module's command and is not queued.</p>
+     * parent command and is not queued.</p>
      *
      * @param sharedBaseCommand the command to register
      */
@@ -112,7 +113,7 @@ public class CommandHelper extends AbstractHelper<SharedBaseCommand<?>> implemen
 
         // Sub Command
         if (sharedBaseCommand instanceof final BaseSubCommand<?, ?, ?> baseSubCommand) {
-            baseSubCommand.getModule().getAbstractCommand().addSubCommand(baseSubCommand.getAbstractCommand());
+            baseSubCommand.getParent().getAbstractCommand().addSubCommand(baseSubCommand.getAbstractCommand());
         }
     }
 
@@ -124,7 +125,7 @@ public class CommandHelper extends AbstractHelper<SharedBaseCommand<?>> implemen
      * released.</p>
      *
      * <p>If the command is a {@link BaseSubCommand}, it is detached from its parent
-     * module's command.</p>
+     * command.</p>
      *
      * <p>Any built-in system command displaced by this command's label or aliases is
      * restored, returning the manager to its pre-registration state for those names.</p>
@@ -140,7 +141,7 @@ public class CommandHelper extends AbstractHelper<SharedBaseCommand<?>> implemen
 
         // Sub Command
         if (sharedBaseCommand instanceof final BaseSubCommand<?, ?, ?> baseSubCommand) {
-            final AbstractCommand parent = baseSubCommand.getModule().getAbstractCommand();
+            final AbstractCommand parent = baseSubCommand.getParent().getAbstractCommand();
 
             if (parent != null) {
                 parent.getSubCommands().remove(baseSubCommand.getAbstractCommand().getName());

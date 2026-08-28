@@ -2,15 +2,16 @@
 
 A Hytale server plugin framework providing structured command systems, event utilities, packet interception, ECS integration, and lifecycle management built on the [Hierarchy-Framework](https://github.com/Trae-Maven/hierarchy-framework).
 
-Hytale-Plugin-Framework bridges the Hytale plugin lifecycle with the component-based hierarchy architecture, automatically handling registration and teardown of listeners, packet watchers, commands, subcommands, and ECS event systems as components are initialized and shut down.
+Hytale-Plugin-Framework bridges the Hytale plugin lifecycle with the component-based hierarchy architecture, automatically handling registration and teardown of listeners, packet watchers, packet filters, commands, subcommands, and ECS event systems as components are initialized and shut down.
 
 ---
 
 ## Features
 
-- Automatic Hytale registration — listeners, packet watchers, commands, subcommands, and ECS systems are registered/unregistered through hierarchy lifecycle callbacks
-- Packet interception — inbound and outbound packet watchers with automatic pipeline registration and deregistration
+- Automatic Hytale registration — listeners, packet watchers, packet filters, commands, subcommands, and ECS systems are registered/unregistered through hierarchy lifecycle callbacks
+- Packet interception — inbound and outbound packet watchers and filters with automatic pipeline registration and deregistration
 - ECS event system integration — custom entity and chunk event systems with a unified `SystemContext` API
+- Command system that transparently overrides built-in system commands, restoring them on shutdown
 - Thread-safe event dispatch utilities — synchronous and asynchronous with `CompletableFuture` support
 - Custom event base classes with cancellation reasons
 - World-thread-aware task execution with `CompletableFuture` bridging
@@ -24,24 +25,24 @@ Hytale-Plugin-Framework bridges the Hytale plugin lifecycle with the component-b
 ```
 HytalePlugin (extends JavaPlugin, implements Plugin)
   └─ Manager
-       └─ AbstractCommand / Module
-            └─ AbstractSubCommand / SubModule
+       └─ BaseCommand (Node under the Manager)
+            └─ BaseSubCommand (Node under the command)
 ```
 
-Commands integrate directly into the hierarchy as Modules, and subcommands as SubModules:
+Commands and subcommands integrate directly into the hierarchy as Nodes, each with typed access to its parent:
 
 | Component | Hierarchy Role | Hytale Integration |
 |---|---|---|
 | `HytalePlugin` | Plugin | `JavaPlugin` lifecycle, component registration |
 | `Manager` | Manager | Organizational grouping |
-| `AbstractCommand` | Module | Registered with command registry |
-| `AbstractSubCommand` | SubModule | Attached to parent command |
+| `BaseCommand` | Node under a Manager | Registered with the command registry |
+| `BaseSubCommand` | Node under a command | Attached to parent command |
 
 ---
 
 ## Requirements
 
-Hytale-Plugin-Framework requires Java 21+ and the Hytale Server API.
+Hytale-Plugin-Framework requires Java 25+ and the Hytale Server API.
 
 The following is only needed at compile time for annotation processing:
 ```xml
@@ -59,7 +60,7 @@ The following is only needed at compile time for annotation processing:
 
 Hytale-Plugin-Framework depends on the following libraries, which are included automatically through Maven:
 
-- [Hierarchy-Framework](https://github.com/Trae-Maven/hierarchy-framework) – Plugin, Manager, Module, SubModule hierarchy with lifecycle management.
+- [Hierarchy-Framework](https://github.com/Trae-Maven/hierarchy-framework) – Plugin, Manager, and Node hierarchy with lifecycle management.
 - [Dependency Injector](https://github.com/Trae-Maven/dependency-injector) – Container management, classpath scanning, and component wiring.
 - [Utilities](https://github.com/Trae-Maven/utilities) – Generic type resolution, string utilities, and casting helpers.
 
@@ -107,14 +108,48 @@ public class CorePlugin extends HytalePlugin {
 
 ### Defining a Listener
 
-Implement the `Listener` marker interface and annotate handler methods with `@EventHandler`:
+Extend `EventListener` and annotate handler methods with `@EventHandler`:
 ```java
 @Component
-public class PlayerListener implements Listener {
+public class PlayerListener extends EventListener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         // Handle player join
+    }
+}
+```
+
+### Defining a Command
+
+Extend `BaseCommand`, naming the owning Manager as the second type parameter. The backing engine
+wrapper is built during initialization, so aliases can be added in the constructor:
+```java
+@Component
+public class AccountCommand extends BaseCommand<CorePlugin, AccountManager, CommandSender> {
+
+    public AccountCommand() {
+        super("account", "Account management", "core.commands.account");
+
+        this.getAliases().add("acc");
+    }
+}
+```
+
+Commands are queued as they initialize and registered in a single pass once the whole hierarchy
+is up. Registering a command displaces any built-in system command sharing its label or aliases;
+the built-in is restored when the framework command is unregistered.
+
+### Defining a SubCommand
+
+The second type parameter names the parent command, which is resolved through `getParent()`.
+Subcommands are attached to that parent automatically as each component initializes:
+```java
+@Component
+public class AdminSubCommand extends BaseSubCommand<CorePlugin, AccountCommand, CommandSender> {
+
+    public AdminSubCommand() {
+        super("admin", "Toggle Admin Mode", "core.commands.account.admin");
     }
 }
 ```
@@ -198,14 +233,17 @@ UtilTask.executeAsynchronous(() -> {
 
 ---
 
-## Packet Watchers
+## Packet Watchers and Filters
 
 | Marker Interface | Direction | Description |
 |---|---|---|
 | `InboundPacketWatcher` | Client → Server | Observes packets sent by the client |
 | `OutboundPacketWatcher` | Server → Client | Observes packets sent to the client |
 
-Packet watchers implement `PacketWatcher` or `PlayerPacketWatcher` alongside a direction marker. They are automatically registered with `PacketAdapters` on component initialization and deregistered on shutdown. All packet watchers run on the network thread — ECS component access must be scheduled via `world.execute()`.
+Packet watchers implement `PacketWatcher` or `PlayerPacketWatcher` alongside a direction marker;
+packet filters implement `PacketFilter` or `PlayerPacketFilter`. All four are automatically
+registered with `PacketAdapters` on component initialization and deregistered on shutdown. They
+run on the network thread — ECS component access must be scheduled via `world.execute()`.
 
 ---
 
@@ -220,12 +258,28 @@ Both system types wrap the raw `EntityEventSystem.handle(...)` parameters into a
 
 ---
 
+## Helpers
+
+| Helper | Manages |
+|---|---|
+| `EventHelper` | Event listener registrations |
+| `SystemHelper` | ECS system registrations |
+| `CommandHelper` | Command and subcommand registrations, with built-in command override and restore |
+| `PacketWatcherHelper` | Packet watcher registrations |
+| `PlayerPacketWatcherHelper` | Player packet watcher registrations |
+| `PacketFilterHelper` | Packet filter registrations |
+| `PlayerPacketFilterHelper` | Player packet filter registrations |
+
+---
+
 ## Interfaces
 
 | Interface | Description |
 |---|---|
 | `HytalePlugin` | Root plugin with automatic Hytale registration callbacks |
-| `Listener` | Marker interface for event listener discovery |
+| `Node` | Typed parent access for commands and subcommands (provided by Hierarchy-Framework) |
+| `SharedBaseCommand` | Shared contract between commands and subcommands |
+| `EventListener` | Base class for event listener discovery |
 | `InboundPacketWatcher` | Marker interface for inbound packet watcher direction |
 | `OutboundPacketWatcher` | Marker interface for outbound packet watcher direction |
 | `Processable` | Deferred batch-processing contract for helpers |

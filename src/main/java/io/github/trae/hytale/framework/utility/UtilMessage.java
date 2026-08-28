@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.UtilityClass;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;

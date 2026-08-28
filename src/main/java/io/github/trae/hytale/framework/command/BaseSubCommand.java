@@ -2,7 +2,7 @@ package io.github.trae.hytale.framework.command;
 
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
-import io.github.trae.hf.SubModule;
+import io.github.trae.hf.Node;
 import io.github.trae.hytale.framework.HytalePlugin;
 import io.github.trae.hytale.framework.command.interfaces.SharedBaseCommand;
 import io.github.trae.hytale.framework.command.wrappers.AbstractAsyncCommandWrapper;
@@ -16,11 +16,11 @@ import java.util.List;
 /**
  * Base class for framework sub-commands attached to a parent {@link BaseCommand}.
  *
- * <p>A {@code BaseSubCommand} is both a {@link SubModule} (nested under its parent
- * command's module lifecycle) and a {@link SharedBaseCommand} (carrying the shared
- * command contract). The backing engine wrapper —
- * {@link AbstractAsyncCommandWrapper} or {@link AbstractCommandWrapper}, chosen by
- * {@link #isAsynchronous()} — is built lazily in {@link #initializeFrame()} and
+ * <p>A {@code BaseSubCommand} is both a {@link Node} (nested beneath its parent command
+ * in the hierarchy, which it resolves through {@link Node#getParent()}) and a
+ * {@link SharedBaseCommand} (carrying the shared command contract). The backing engine
+ * wrapper — {@link AbstractAsyncCommandWrapper} or {@link AbstractCommandWrapper}, chosen
+ * by {@link #isAsynchronous()} — is built lazily in {@link #initializeFrame()} and
  * released in {@link #shutdownFrame()}, rather than at construction time.</p>
  *
  * <p>Deferring wrapper creation until {@link #initializeFrame()} ensures all fields
@@ -28,13 +28,17 @@ import java.util.List;
  * reads them via {@link #getLabel()}, {@link #getDescription()}, and
  * {@link #getAliases()}.</p>
  *
+ * <p>Attachment to the parent command is performed by the plugin's component lifecycle
+ * ({@link HytalePlugin#onComponentInitialize(Object)} routing through
+ * {@link io.github.trae.hytale.framework.helper.CommandHelper}), not by this class.</p>
+ *
  * @param <BasePlugin>    the owning plugin type
  * @param <ParentCommand> the parent command type this sub-command belongs to
  * @param <Sender>        the expected {@link CommandSender} subtype
  */
 @Getter
 @Setter
-public abstract class BaseSubCommand<BasePlugin extends HytalePlugin, ParentCommand extends BaseCommand<BasePlugin, ?, ?>, Sender extends CommandSender> implements SubModule<BasePlugin, ParentCommand>, SharedBaseCommand<Sender> {
+public abstract class BaseSubCommand<BasePlugin extends HytalePlugin, ParentCommand extends BaseCommand<BasePlugin, ?, ?>, Sender extends CommandSender> implements Node<BasePlugin, ParentCommand>, SharedBaseCommand<Sender> {
 
     /**
      * The sub-command's primary label and human-readable description.
@@ -58,6 +62,9 @@ public abstract class BaseSubCommand<BasePlugin extends HytalePlugin, ParentComm
 
     /**
      * Creates a sub-command with the given label, description, and permission.
+     *
+     * <p>Aliases start empty and may be populated before {@link #initializeFrame()}
+     * builds the wrapper that reads them.</p>
      *
      * @param label       the primary sub-command label
      * @param description the human-readable description
