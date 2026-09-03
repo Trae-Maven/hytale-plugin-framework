@@ -25,7 +25,7 @@ import io.github.trae.hytale.framework.system.SystemListener;
 import io.github.trae.hytale.framework.utility.UtilEvent;
 import io.github.trae.hytale.framework.utility.UtilPlugin;
 import io.github.trae.hytale.framework.utility.UtilTask;
-import io.github.trae.utilities.UtilLogger;
+import lombok.CustomLog;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -66,6 +66,7 @@ import javax.annotation.Nonnull;
  * @see PlayerPacketFilterHelper
  * @see CommandHelper
  */
+@CustomLog
 @Getter
 @Scan
 public class HytalePlugin extends JavaPlugin implements Plugin {
@@ -120,8 +121,6 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
     public HytalePlugin(@Nonnull final JavaPluginInit javaPluginInit) {
         super(javaPluginInit);
 
-        UtilLogger.setLogger(this.getLogger());
-
         InjectorApi.setConfigurationDirectory(this.getClass(), this.getDataDirectory());
 
         if (InjectorApi.getScheduledExecutorService() == null) {
@@ -154,7 +153,7 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
         // Bulk-register all queued commands with the command registry
         this.commandHelper.process();
 
-        UtilPlugin.registerInternalPlugin(this);
+        UtilPlugin.addInternalPlugin(this);
 
         UtilEvent.dispatch(new PluginInitializeEvent(this));
     }
@@ -169,6 +168,8 @@ public class HytalePlugin extends JavaPlugin implements Plugin {
         UtilEvent.dispatch(new PluginShutdownEvent(this));
 
         Plugin.super.shutdownPlugin();
+
+        UtilPlugin.removeInternalPlugin(this);
     }
 
     /**

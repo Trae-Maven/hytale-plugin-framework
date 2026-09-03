@@ -37,6 +37,8 @@ public class AbstractAsyncCommandWrapper extends AbstractAsyncCommand {
     public AbstractAsyncCommandWrapper(final SharedBaseCommand<?> sharedBaseCommand) {
         super(sharedBaseCommand.getLabel(), sharedBaseCommand.getDescription(), false);
 
+        this.requireNoPermission();
+
         this.setAllowsExtraArguments(true);
 
         this.addAliases(sharedBaseCommand.getAliases().toArray(new String[0]));
@@ -58,17 +60,6 @@ public class AbstractAsyncCommandWrapper extends AbstractAsyncCommand {
         for (int argCount = 1; argCount <= suggestions.size(); argCount++) {
             this.addUsageVariant(new VariantCommandWrapper(sharedBaseCommand, sharedWrappers, argCount));
         }
-    }
-
-    /**
-     * Disables automatic permission generation, deferring entirely to the wrapped
-     * command's {@link SharedBaseCommand#hasPermission(CommandSender)}.
-     *
-     * @return always {@code false}
-     */
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
     }
 
     /**

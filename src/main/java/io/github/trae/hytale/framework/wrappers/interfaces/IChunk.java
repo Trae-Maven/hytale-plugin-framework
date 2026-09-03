@@ -1,6 +1,5 @@
 package io.github.trae.hytale.framework.wrappers.interfaces;
 
-import com.hypixel.hytale.server.core.entity.Entity;
 import com.hypixel.hytale.server.core.universe.world.World;
 import io.github.trae.hytale.framework.wrappers.BlockLocation;
 import io.github.trae.hytale.framework.wrappers.Chunk;
@@ -20,8 +19,4 @@ public interface IChunk {
     List<BlockLocation> getOutlineHighestBlockLocations();
 
     List<Chunk> getNearbyChunks(final int distance, final boolean includeSelf);
-
-    <EntityType extends Entity> List<EntityType> getEntitiesByType(final Class<EntityType> clazz);
-
-    List<Entity> getEntities();
 }

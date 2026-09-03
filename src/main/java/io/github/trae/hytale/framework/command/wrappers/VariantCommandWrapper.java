@@ -48,6 +48,8 @@ public class VariantCommandWrapper extends AbstractCommand {
     public VariantCommandWrapper(final SharedBaseCommand<?> sharedBaseCommand, final List<ArgumentTypeWrapper> sharedWrappers, final int argCount) {
         super(sharedBaseCommand.getDescription());
 
+        this.requireNoPermission();
+
         this.setAllowsExtraArguments(true);
 
         for (int i = 0; i < argCount; i++) {
@@ -57,16 +59,6 @@ public class VariantCommandWrapper extends AbstractCommand {
         }
 
         this.sharedBaseCommand = sharedBaseCommand;
-    }
-
-    /**
-     * Disables automatic permission generation, deferring to the wrapped command.
-     *
-     * @return always {@code false}
-     */
-    @Override
-    protected boolean canGeneratePermission() {
-        return false;
     }
 
     /**

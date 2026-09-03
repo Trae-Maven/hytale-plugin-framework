@@ -1,15 +1,9 @@
 package io.github.trae.hytale.framework.wrappers;
 
-import com.hypixel.hytale.component.Archetype;
-import com.hypixel.hytale.component.ComponentType;
-import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.server.core.entity.Entity;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.EntityChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import io.github.trae.hytale.framework.wrappers.interfaces.IChunk;
 import io.github.trae.utilities.UtilJava;
 import lombok.Getter;
@@ -66,8 +60,15 @@ public class Chunk implements IChunk {
 
     private World world;
 
+    /**
+     * Returns the chunk containing the given world position.
+     *
+     * @param world    the world the position belongs to
+     * @param vector3d the world position
+     * @return the chunk containing that position
+     */
     public static Chunk of(final World world, final Vector3d vector3d) {
-        return new Chunk(world.getName(), (int) Math.floor(vector3d.x()) >> 5, (int) Math.floor(vector3d.z()) >> 5);
+        return new Chunk(world.getName(), (int) Math.floor(vector3d.x()) >> SHIFT, (int) Math.floor(vector3d.z()) >> SHIFT);
     }
 
     /**
@@ -261,61 +262,6 @@ public class Chunk implements IChunk {
                 }
             }
         });
-    }
-
-    /**
-     * Returns all entities in this chunk that are instances of the given type.
-     * Scans the chunk's entity holders and resolves entity components via archetype introspection,
-     * avoiding the deprecated {@code EntityUtils} methods.
-     *
-     * @param clazz the entity class to filter by (e.g. Entity.class, LivingEntity.class, Player.class)
-     * @return a list of matching entities, or an empty list if the chunk is not loaded
-     */
-    @Override
-    public <EntityType extends Entity> List<EntityType> getEntitiesByType(final Class<EntityType> clazz) {
-        return UtilJava.createCollection(new ArrayList<>(), list -> {
-            final WorldChunk worldChunk = this.getWorld().getChunkIfLoaded(ChunkUtil.indexChunk(this.getX(), this.getZ()));
-            if (worldChunk == null) {
-                return;
-            }
-
-            final EntityChunk entityChunk = worldChunk.getEntityChunk();
-            if (entityChunk == null) {
-                return;
-            }
-
-            for (final Holder<EntityStore> entityHolder : entityChunk.getEntityHolders()) {
-                final Archetype<EntityStore> archetype = entityHolder.getArchetype();
-                if (archetype == null) {
-                    continue;
-                }
-
-                for (int index = archetype.getMinIndex(); index < archetype.length(); index++) {
-                    final ComponentType<EntityStore, ?> componentType = archetype.get(index);
-                    if (componentType == null) {
-                        continue;
-                    }
-
-                    if (!(clazz.isAssignableFrom(componentType.getTypeClass()))) {
-                        continue;
-                    }
-
-                    final EntityType entity = UtilJava.cast(clazz, entityHolder.getComponent(componentType));
-                    if (entity != null) {
-                        list.add(entity);
-                    }
-                    break;
-                }
-            }
-        });
-    }
-
-    /**
-     * Returns all entities in this chunk.
-     */
-    @Override
-    public List<Entity> getEntities() {
-        return this.getEntitiesByType(Entity.class);
     }
 
     /**
