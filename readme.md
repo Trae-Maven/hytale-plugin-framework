@@ -110,7 +110,7 @@ public class CorePlugin extends HytalePlugin {
 
 Extend `EventListener` and annotate handler methods with `@EventHandler`:
 ```java
-@Component
+@Singleton
 public class PlayerListener extends EventListener {
 
     @EventHandler
@@ -125,7 +125,7 @@ public class PlayerListener extends EventListener {
 Extend `BaseCommand`, naming the owning Manager as the second type parameter. The backing engine
 wrapper is built during initialization, so aliases can be added in the constructor:
 ```java
-@Component
+@Singleton
 public class AccountCommand extends BaseCommand<CorePlugin, AccountManager, CommandSender> {
 
     public AccountCommand() {
@@ -145,7 +145,7 @@ the built-in is restored when the framework command is unregistered.
 The second type parameter names the parent command, which is resolved through `getParent()`.
 Subcommands are attached to that parent automatically as each component initializes:
 ```java
-@Component
+@Singleton
 public class AdminSubCommand extends BaseSubCommand<CorePlugin, AccountCommand, CommandSender> {
 
     public AdminSubCommand() {
@@ -158,7 +158,7 @@ public class AdminSubCommand extends BaseSubCommand<CorePlugin, AccountCommand, 
 
 Extend `CustomEntityEventSystem` or `CustomChunkEventSystem` to handle ECS events with a simplified `SystemContext`:
 ```java
-@Component
+@Singleton
 public class DamageSystem extends CustomEntityEventSystem<DamageEvent> {
 
     public DamageSystem() {

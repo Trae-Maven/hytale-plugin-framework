@@ -1,7 +1,7 @@
 package io.github.trae.hytale.framework.command.service;
 
 import com.hypixel.hytale.server.core.command.system.CommandSender;
-import io.github.trae.di.annotations.type.component.Component;
+import io.github.trae.di.annotations.type.component.Singleton;
 import io.github.trae.hytale.framework.command.impl.Confirmable;
 import io.github.trae.hytale.framework.command.service.interfaces.IConfirmableService;
 import io.github.trae.utilities.UtilTime;
@@ -9,7 +9,7 @@ import io.github.trae.utilities.UtilTime;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
+@Singleton
 public class ConfirmableService implements IConfirmableService {
 
     private record Cache(Confirmable confirmable, long systemTime) {}
